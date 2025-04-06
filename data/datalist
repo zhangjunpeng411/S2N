@@ -1,0 +1,9 @@
+BRCA_genes
+ST_ncR_tar_cancer: ST_ncR_cancer ST_tar_cancer
+ST_ncR_tar_count_cancer: ST_ncR_count_cancer ST_tar_count_cancer
+bulk_ncR_tar_normal_cancer: bulk_ncR_cancer bulk_ncR_normal bulk_tar_cancer bulk_tar_normal
+hub_ncRNAs
+mut_ncR
+network
+scRNA_ncR_tar_count_cancer: scRNA_ncR_count_cancer scRNA_tar_count_cancer
+scRNA_ncR_tar_normal_cancer: scRNA_ncR_cancer scRNA_ncR_normal scRNA_tar_cancer scRNA_tar_normal
