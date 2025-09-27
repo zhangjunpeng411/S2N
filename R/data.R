@@ -190,7 +190,19 @@ NULL
 #' @docType data
 #' @name lncRTarget_Groundtruth
 #' @aliases lncRTarget_Groundtruth
-#' @format lncRTarget_Groundtruth: A data frame object with 3,039,533 lncRRNA-target interactions.
-#' @details The groundtruth of lncRRNA-target interactions are from RegNetwork v2025.
-#' @references Li B, Wang C, Wang Y, Li P, Liu ZP. RegNetwork 2025: an integrative data repository for gene regulatory networks in human and mouse. Nucleic Acids Res. 2025:gkaf779. doi: 10.1093/nar/gkaf779.
+#' @format lncRTarget_Groundtruth: A data frame object with 3,039,533 lncRNA-target interactions.
+#' @details The groundtruth of lncRNA-target interactions are from RegNetwork v2025.
+#' @references Li B, Wang C, Wang Y, Li P, Liu ZP. RegNetwork 2025: an integrative data repository for gene regulatory networks in human and mouse.
+#' Nucleic Acids Res. 2025:gkaf779. doi: 10.1093/nar/gkaf779.
+NULL
+
+#' Groundtruth of TF-target interactions
+#'
+#' @docType data
+#' @name TFTarget_Groundtruth
+#' @aliases TFTarget_Groundtruth
+#' @format TFTarget_Groundtruth: A data frame object with 43,178 TF-target interactions.
+#' @details The groundtruth of TF-target interactions are from CollecTRI.
+#' @references Müller-Dott S, Tsirvouli E, Vazquez M, Ramirez Flores RO, Badia-I-Mompel P, Fallegger R, Türei D, Lægreid A, Saez-Rodriguez J.
+#' Expanding the coverage of regulons from high-confidence prior knowledge for accurate estimation of transcription factor activities. Nucleic Acids Res. 2023 Nov 10;51(20):10934-10949.
 NULL

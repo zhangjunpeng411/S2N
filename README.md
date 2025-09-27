@@ -16,6 +16,7 @@ The BRCA sample data contains the following:
 2. Mutation data.
 3. Groundtruth of miRNA-target interactions.
 4. Groundtruth of lncRNA-target interactions.
+5. Groundtruth of TF-target interactions.
 
 ```{r, eval=TRUE, include=TRUE}
 data(bulk_ncR_tar_normal_cancer)
