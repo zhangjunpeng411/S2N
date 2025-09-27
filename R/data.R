@@ -1,4 +1,4 @@
-#' bulk ncRNA expression data in breast cancer
+#' Bulk ncRNA expression data in breast cancer
 #'
 #' @docType data
 #' @name bulk_ncR_cancer
@@ -7,7 +7,7 @@
 #' @details The matched miRNA and lncRNA expression data in breast cancer is obtained from TCGA (http://cancergenome.nih.gov/).
 NULL
 
-#' bulk ncRNA expression data in normal breast
+#' Bulk ncRNA expression data in normal breast
 #'
 #' @docType data
 #' @name bulk_ncR_normal
@@ -16,7 +16,7 @@ NULL
 #' @details The matched miRNA and lncRNA expression data in normal breast is obtained from TCGA (http://cancergenome.nih.gov/).
 NULL
 
-#' bulk target gene expression data in breast cancer
+#' Bulk target gene expression data in breast cancer
 #'
 #' @docType data
 #' @name bulk_tar_cancer
@@ -25,7 +25,7 @@ NULL
 #' @details The matched lncRNA and mRNA expression data in breast cancer is obtained from TCGA (http://cancergenome.nih.gov/).
 NULL
 
-#' bulk target gene expression data in normal breast
+#' Bulk target gene expression data in normal breast
 #'
 #' @docType data
 #' @name bulk_tar_normal
@@ -34,7 +34,7 @@ NULL
 #' @details The matched lncRNA and mRNA expression data in normal breast is obtained from TCGA (http://cancergenome.nih.gov/).
 NULL
 
-#' single-cell ncRNA expression data in breast cancer
+#' Single-cell ncRNA expression data in breast cancer
 #'
 #' @docType data
 #' @name scRNA_ncR_cancer
@@ -46,7 +46,7 @@ NULL
 #' @references Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 NULL
 
-#' single-cell ncRNA expression data in normal breast
+#' Single-cell ncRNA expression data in normal breast
 #'
 #' @docType data
 #' @name scRNA_ncR_normal
@@ -61,7 +61,7 @@ NULL
 #' 2020;25(4):367-387.
 NULL
 
-#' single-cell target gene expression data in breast cancer
+#' Single-cell target gene expression data in breast cancer
 #'
 #' @docType data
 #' @name scRNA_tar_cancer
@@ -73,7 +73,7 @@ NULL
 #' @references Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 NULL
 
-#' single-cell target gene expression data in normal breast
+#' Single-cell target gene expression data in normal breast
 #'
 #' @docType data
 #' @name scRNA_tar_normal
@@ -87,7 +87,7 @@ NULL
 #' and Mature States: a Novel, Non-invasive Framework for Investigating Human Lactation Physiology. J Mammary Gland Biol Neoplasia. 2020;25(4):367-387.
 NULL
 
-#' single-cell target gene count data in breast cancer
+#' Single-cell target gene count data in breast cancer
 #'
 #' @docType data
 #' @name scRNA_tar_count_cancer
@@ -99,7 +99,7 @@ NULL
 #' @references Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 NULL
 
-#' single-cell ncRNA count data in breast cancer
+#' Single-cell ncRNA count data in breast cancer
 #'
 #' @docType data
 #' @name scRNA_ncR_count_cancer
@@ -111,7 +111,7 @@ NULL
 #' @references Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 NULL
 
-#' spatial transcriptomics data of lncRNA in breast cancer
+#' Spatial transcriptomics data of lncRNA in breast cancer
 #'
 #' @docType data
 #' @name ST_ncR_cancer
@@ -123,7 +123,7 @@ NULL
 #' @references Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 NULL
 
-#' spatial transcriptomics data of mRNA in breast cancer
+#' Spatial transcriptomics data of mRNA in breast cancer
 #'
 #' @docType data
 #' @name ST_tar_cancer
@@ -135,7 +135,7 @@ NULL
 #' @references Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 NULL
 
-#' spatial transcriptomics count data of lncRNA in breast cancer
+#' Spatial transcriptomics count data of lncRNA in breast cancer
 #'
 #' @docType data
 #' @name ST_ncR_count_cancer
@@ -147,7 +147,7 @@ NULL
 #' @references Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 NULL
 
-#' spatial transcriptomics count data of mRNA in breast cancer
+#' Spatial transcriptomics count data of mRNA in breast cancer
 #'
 #' @docType data
 #' @name ST_tar_count_cancer
@@ -159,7 +159,7 @@ NULL
 #' @references Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 NULL
 
-#' mutation data
+#' Mutation data
 #'
 #' @docType data
 #' @name mut_ncR
@@ -171,42 +171,26 @@ NULL
 #'
 NULL
 
-#' BRCA genes
+#' Groundtruth of miRNA-target interactions
 #'
 #' @docType data
-#' @name BRCA_genes
-#' @aliases BRCA_genes
-#' @format BRCA_genes: A matrix object with 4819 BRCA related genes (including lncRNAs and mRNAs).
-#' @details The BRCA related lncRNAs are from LncRNADisease v2.0, Lnc2Cancer v2.0
-#' and MNDR v2.0. The BRCA related mRNAs are from DisGeNET v5.0 and COSMIC v86.
-#' @references Bao Z, Yang Z, Huang Z, Zhou Y, Cui Q, Dong D. LncRNADisease 2.0: an updated database of long non-coding RNA-associated diseases. Nucleic Acids Res. 2019;47(D1):D1034-D1037.
-#' @references Cui T, Zhang L, Huang Y, Yi Y, Tan P, Zhao Y, Hu Y, Xu L, Li E, Wang D. MNDR v2.0: an updated resource of ncRNA-disease associations in mammals. Nucleic Acids Res. 2018;46(D1):D371-D374.
-#' @references Gao Y, Wang P, Wang Y, Ma X, Zhi H, Zhou D, Li X, Fang Y, Shen W, Xu Y, Shang S, Wang L, Wang L, Ning S, Li X. Lnc2Cancer v2.0: updated database of experimentally supported
-#' long non-coding RNAs in human cancers. Nucleic Acids Res. 2019;47(D1):D1028-D1033.
-#' @references Forbes SA, Beare D, Boutselakis H, Bamford S, Bindal N, Tate J, Cole CG, Ward S, Dawson E, Ponting L, Stefancsik R, Harsha B, Kok CY, Jia M, Jubb H, Sondka Z, Thompson S, De T,
-#' Campbell PJ. COSMIC: somatic cancer genetics at high-resolution. Nucleic Acids Res. 2017;45(D1):D777-D783.
-#' @references Piñero J, Bravo À, Queralt-Rosinach N, Gutiérrez-Sacristán A, Deu-Pons J, Centeno E, García-García J, Sanz F, Furlong LI. DisGeNET: a comprehensive platform integrating information
-#' on human disease-associated genes and variants. Nucleic Acids Res. 2017;45(D1):D833-D839.
-#' @references Zhang J, Liu L, Xu T, Zhang W, Zhao C, Li S, Li J, Rao N, Le TD. miRSM: an R package
-#' to infer and analyse miRNA sponge modules in heterogeneous data. RNA Biol. 2021;18(12):2308-2320.
+#' @name miRTarget_Groundtruth
+#' @aliases miRTarget_Groundtruth
+#' @format miRTarget_Groundtruth: A data frame object with 2,956,530 miRNA-target interactions.
+#' @details The groundtruth of miRNA-target interactions are from miRTarBase v10.0 and TarBase v9.0.
+#' @references Cui S, Yu S, Huang HY, Lin YC, Huang Y, Zhang B, Xiao J, Zuo H, Wang J, Li Z, Li G, Ma J, Chen B, Zhang H, Fu J, Wang L,
+#' Huang HD. miRTarBase 2025: updates to the collection of experimentally validated microRNA-target interactions. Nucleic Acids Res. 2025;53(D1):D147-D156.
+#' @references Skoufos G, Kakoulidis P, Tastsoglou S, Zacharopoulou E, Kotsira V, Miliotis M, Mavromati G, Grigoriadis D, Zioga M, Velli A, Koutou I,
+#' Karagkouni D, Stavropoulos S, Kardaras FS, Lifousi A, Vavalou E, Ovsepian A, Skoulakis A, Tasoulis SK, Georgakopoulos SV, Plagianakos VP, Hatzigeorgiou AG.
+#' TarBase-v9.0 extends experimentally supported miRNA-gene interactions to cell-types and virally encoded miRNAs. Nucleic Acids Res. 2024;52(D1):D304-D310.
 NULL
 
-#' network
+#' Groundtruth of lncRNA-target interactions
 #'
 #' @docType data
-#' @name network
-#' @aliases network
-#' @format network: A list object with five ncRNA-target regulatory networks predicted by the SCS method
-#' @details A list of five ncRNA-target regulatory networks as a demo
+#' @name lncRTarget_Groundtruth
+#' @aliases lncRTarget_Groundtruth
+#' @format lncRTarget_Groundtruth: A data frame object with 3,039,533 lncRRNA-target interactions.
+#' @details The groundtruth of lncRRNA-target interactions are from RegNetwork v2025.
+#' @references Li B, Wang C, Wang Y, Li P, Liu ZP. RegNetwork 2025: an integrative data repository for gene regulatory networks in human and mouse. Nucleic Acids Res. 2025:gkaf779. doi: 10.1093/nar/gkaf779.
 NULL
-
-#' hub_ncRNAs
-#'
-#' @docType data
-#' @name hub_ncRNAs
-#' @aliases hub_ncRNAs
-#' @format hub_ncRNAs: A list object with hub ncRNAs existed in five ncRNA-target regulatory networks predicted by the SCS method
-#' @details A list of hub ncRNAs existed in five ncRNA-target regulatory networks as a demo
-NULL
-
-
