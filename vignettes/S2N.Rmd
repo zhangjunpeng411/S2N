@@ -1,5 +1,5 @@
 ---
-title: "S2N: an R package to infer sample-specific network"
+title: "S2N: an R package to infer sample-specific networks from transcriptomic data"
 author: "Junpeng Zhang"
 date: '`r Sys.Date()`'
 output: 
@@ -10,7 +10,7 @@ output:
 vignette: >
   %\VignettePackage{S2N}
   %\VignetteEncoding{UTF-8}
-  %\VignetteIndexEntry{S2N: an R package to infer sample-specific network}
+  %\VignetteIndexEntry{S2N: an R package to infer sample-specific networks from transcriptomic data}
   %\VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -26,17 +26,17 @@ library(S2N)
 ```
 
 # Introduction
-Existing methods have been proposed to identify sample-specific network (a network for a sample) from bulk and single-cell transcriptomics data with different programming languages (e.g. Matlab, Python, R). To facilitate comparison and the selection of a more suitable method for exploring sample-specific network in transcriptomics data, we implement S2N R package.
+Existing methods have been proposed to identify sample-specific networks (a network for a sample) from bulk, single-cell and spatial transcriptomics data with different programming languages (e.g. Matlab, Python, R). To facilitate comparison and the selection of a more suitable method for exploring sample-specific networks in transcriptomics data, we implement S2N R package.
 
-# Inferring sample-specific network
-S2N provides six computational methods to identify sample-specific network, including Single-Sample Network (SSN) [1], Paired-Single-Sample Network (Paired-SSN) [2], Linear Interpolation to Obtain Network Estimates for Single Samples (LIONESS) [3], SCS (single-sample controller strategy) [4], CSN (cell-specific network) [5, 6], Scan.perturb (Sample-speCific miRNA regulAtioN with statistical perturbation strategy) [7]. 
+# Inferring sample-specific networks
+S2N provides 10 computational methods to identify sample-specific networks, including SSN (Single-Sample Network) [1], Paired-SSN (Paired-Single-Sample Network) [2], LIONESS (Linear Interpolation to Obtain Network Estimates for Single Samples) [3], SCS (single-sample controller strategy) [4], CSN (cell-specific network) [5, 6], Scan.perturb (Sample-speCific miRNA regulAtioN with statistical perturbation strategy) [7], Scan.interp (Sample-speCific miRNA regulAtioN with linear interpolation strategy) [7], SWEET (Sample-specific weighted correlation network) [8], SINUM (SIngle-cell Network Using Mutual information) [9], and BONOBO (Bayesian Optimized Networks Obtained By assimilating Omics data) [10]. This tutorial aims to guide users to apply S2N R package for inferring and analyzing sample-specific networks.
 
 ## Loading BRCA sample data
 The BRCA sample data contains the following:
 1. Bulk RNA-seq data, single-cell RNA-seq (scRNA-seq) data, and spatial transcriptomic (ST) data. 
 2. Mutation data.
-3. Putative ncRNA regulatory network.
-4. Hub ncRNAs.
+3. Groundtruth of miRNA-target interactions.
+4. Groundtruth of lncRNA-target interactions.
 
 ```{r, eval=TRUE, include=TRUE}
 data(bulk_ncR_tar_normal_cancer)
@@ -45,12 +45,12 @@ data(scRNA_ncR_tar_count_cancer)
 data(ST_ncR_tar_cancer)
 data(ST_ncR_tar_count_cancer)
 data(mut_ncR)
-data(network)
-data(hub_ncRNAs)
+data(miRTarget_Groundtruth)
+data(lncRTarget_Groundtruth)
 ```
 
 ## SSN
-By using SSN method, we identify sample-specific ncRNA regulatory network from bulk RNA-seq or scRNA-seq data.
+To identify sample-specific ncRNA regulatory networks, the SSN method needs the matched ncRNA and target expression data in cancer and normal samples. Correlation coefficient is computed by using one of 'pearson' (default), 'kendall', and 'spearman'.
 
 ```{r, eval=TRUE, include=TRUE}
 # bulk data
@@ -61,7 +61,7 @@ scRNA_SSN_res <- SSN(scRNA_ncR_normal[1:100, 1:5], scRNA_tar_normal[1:500, 1:5],
 ```
 
 ## Paired-SSN
-We identify sample-specific ncRNA regulatory network by using Paired-SSN method from bulk RNA-seq or scRNA-seq data.
+Similar to SSN, the Paired-SSN also requires the matched ncRNA and target expression data in cancer and normal samples. Correlation coefficient is computed by using one of 'pearson' (default), 'kendall', and 'spearman'.
 
 ```{r, eval=TRUE, include=TRUE}
 # bulk data
@@ -72,7 +72,7 @@ scRNA_PaiedSSN_res <- PairedSSN(scRNA_ncR_normal[1:100, 1:5], scRNA_tar_normal[1
 ```
 
 ## LIONESS
-By using the LIONESS method, we sample-specific ncRNA regulatory network from bulk RNA-seq, scRNA-seq, and ST data.
+The LIONESS method uses a linear interpolation strategy to identify sample-specific ncRNA regulatory networks from bulk RNA-seq, scRNA-seq, and ST data. The LIONESS method needs the matched ncRNA and target expression data in cancer or normal samples as input. Any correlation, distance, and regression methods can be used to calculate the strength of ncRNA-target interactions. In S2N, we provide three common correlation methods to compute correlation coefficients, i.e., 'pearson' (default), 'kendall', and 'spearman'.
 
 ```{r, eval=TRUE, include=TRUE}
 # bulk data
@@ -86,21 +86,18 @@ ST_LIONESS_res <- LIONESS(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], 
 ```
 
 ## SCS
-We adapt the SCS method to identify sample-specific ncRNA regulatory network from bulk RNA-seq, scRNA-seq, and ST data.
+The SCS method uses a single-sample controller strategy to identify sample-specific ncRNA regulatory networks from bulk RNA-seq, scRNA-seq, and ST data. The SCS method requires the matched ncRNA and target expression data in cancer or normal samples as input. One of 'pearson' (default), 'kendall', or 'spearman' can be used to compute correlation coefficient.
 
 ```{r, eval=TRUE, include=TRUE}
-# bulk data
-bulk_scs_res <- SCS(mut_ncR, bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = "pearson", number = 10)
-
 # scRNA data
-scRNA_scs_res <- SCS(mut_ncR, scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], cormethod = "pearson", number = 10)
+scRNA_SCS_res <- SCS(mut_ncR, scRNA_ncR_cancer[, 1:5], scRNA_tar_cancer[1:500, 1:5], cormethod = "pearson", number = 10)
 
 # ST data
-ST_scs_res <- SCS(mut_ncR, ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], cormethod = "pearson", number = 10)
+ST_SCS_res <- SCS(mut_ncR, ST_ncR_cancer[, 1:5], ST_tar_cancer[1:500, 1:5], cormethod = "pearson", number = 10)
 ```
 
 ## CSN
-The CSN method is used to identify sample-specific ncRNA regulatory network from bulk RNA-seq, scRNA-seq, and ST data.
+The CSN method uses a novel statistic to identify sample-specific ncRNA regulatory networks from bulk RNA-seq, scRNA-seq, and ST data. The CSN method requires the matched ncRNA and target expression data in cancer or normal samples as input, and the number of samples ia at least 100. If the number of samples is less than 100, the CSN method providea a bootstrap strategy to interpolate pseudo samples to meet the requirement of sample size. Of course, the CSN method only return the sample-specific ncRNA regulatory networks in real samples.
 
 ```{r, eval=TRUE, include=TRUE}
 # bulk data
@@ -114,50 +111,151 @@ ST_CSN_res <- CSN(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], boxsize 
 ```
 
 ## Scan.perturb
-The Scan.perturb method is used to identify sample-specific ncRNA regulatory network from bulk RNA-seq, scRNA-seq, and ST data.
+The Scan.perturb method uses a statistical perturbation strategy to identify sample-specific ncRNA regulatory networks from bulk RNA-seq, scRNA-seq, and ST data. The Scan.perturb method requires the matched ncRNA and target expression data in cancer or normal samples as input. Correlation coefficient is computed by using one of 'pearson' (default), 'kendall', and 'spearman'.
 
 ```{r, eval=TRUE, include=TRUE}
 # bulk data
-bulk_Scan.perturb_res <- Scan.perturb(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], method = "Pearson", p.value.cutoff = 0.05)
+bulk_Scan.perturb_res <- Scan.perturb(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], method = "pearson", p.value.cutoff = 0.05)
 
 # scRNA data
-scRNA_Scan.perturb_res <- Scan.perturb(scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], method = "Pearson", p.value.cutoff = 0.05)
+scRNA_Scan.perturb_res <- Scan.perturb(scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], method = "pearson", p.value.cutoff = 0.05)
 
 # ST data
-ST_Scan.perturb_res <- Scan.perturb(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], method = "Pearson", p.value.cutoff = 0.05)
+ST_Scan.perturb_res <- Scan.perturb(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], method = "pearson", p.value.cutoff = 0.05)
+```
+
+## Scan.interp
+The Scan.interp method is a variant of the LIONESS method, and also use uses a linear interpolation strategy to identify sample-specific ncRNA regulatory networks from bulk RNA-seq, scRNA-seq, and ST data. The Scan.interp method requires the matched ncRNA and target expression data in cancer or normal samples as input. Correlation coefficient is computed by using one of 'pearson' (default), 'kendall', and 'spearman'.
+
+```{r, eval=TRUE, include=TRUE}
+# bulk data
+bulk_Scan.interp_res <- Scan.interp(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], method = "pearson", p.value.cutoff = 0.05)
+
+# scRNA data
+scRNA_Scan.interp_res <- Scan.interp(scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], method = "pearson", p.value.cutoff = 0.05)
+
+# ST data
+ST_Scan.interp_res <- Scan.interp(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], method = "pearson", p.value.cutoff = 0.05)
+```
+
+## SWEET
+The SWEET method constructs weighted correlation network to identify sample-specific ncRNA regulatory networks from bulk RNA-seq, scRNA-seq, and ST data. The SWEET method requires the matched ncRNA and target expression data in cancer or normal samples as input. One of 'euclidean' (default), or 'correlation' can be used to compute distance. 
+
+```{r, eval=TRUE, include=TRUE}
+# bulk data
+bulk_SWEET_res <- SWEET(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], dismethod = 'euclidean')
+
+# scRNA data
+scRNA_SWEET_res <- SWEET(scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], dismethod = 'euclidean')
+
+# ST data
+ST_SWEET_res <- SWEET(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], dismethod = 'euclidean')
+```
+
+## SINUM
+As a variant of CSN, the SINUM method use mutual information to identify sample-specific ncRNA regulatory networks from bulk RNA-seq, scRNA-seq, and ST data. The SINUM method requires the matched ncRNA and target expression data in cancer or normal samples as input. 
+
+```{r, eval=TRUE, include=TRUE}
+# bulk data
+bulk_SINUM_res <- SINUM(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5])
+
+# scRNA data
+scRNA_SINUM_res <- SINUM(scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5])
+
+# ST data
+ST_SINUM_res <- SINUM(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5])
+```
+
+## BONOBO
+The BONOBO method obtains bayesian optimized Networks by assimilating Omics data for identifying sample-specific ncRNA regulatory networks from bulk RNA-seq, scRNA-seq, and ST data. The BONOBO method requires the matched ncRNA and target expression data in cancer or normal samples as input. 
+
+```{r, eval=TRUE, include=TRUE}
+# bulk data
+bulk_BONOBO_res <- BONOBO(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5])
+
+# scRNA data
+scRNA_BONOBO_res <- BONOBO(scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5])
+
+# ST data
+ST_BONOBO_res <- BONOBO(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5])
 ```
 
 # Downstream analysis
+In S2N, we provide five types of downstream analysis to analyze the identified sample-specific networks, including validation analysis, hubs discovery, modules identification, sample-sample similarity matrix construction (in terms of networks, hubs abd modules), and hierarchical clustering analysis.
 
-## Validating sample-specific network
-The function 'Network_validation' is implemented to validate sample-specific network.
+## Validating sample-specific networks
+The function 'Network_validation' is implemented to validate sample-specific networks. The built-in groundtruth of miRNA-target and lncRNA-target interactions ('miRTarget_Groundtruth' and 'lncRTarget_Groundtruth') are from miRTarBase v10.0 [11], TarBase v9.0 [12] and RegNetwork v2025 [13]. 
 
-## Identifying sample-specific hub regulators
-The function 'Network_hub' is implemented to Identifying sample-specific hub regulators with the largest 20% degree in default.
+```{r, eval=TRUE, include=TRUE}
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+miRTarget_validation <- Network_validation(bulk_LIONESS_res, miRTarget_Groundtruth)
+scRNA_LIONESS_res <- LIONESS(scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+lncTarget_validation <- Network_validation(scRNA_LIONESS_res, lncRTarget_Groundtruth)
+```
+
+## Identifying sample-specific hubs
+The function 'Network_hub' is implemented to Identifying sample-specific hubs with the largest 20% degree in default.
+
+```{r, eval=TRUE, include=TRUE}
+hubs <- Network_hub(bulk_LIONESS_res)
+```
 
 ## Predicting sample-specific modules
-To identify sample-specific modules from sample-specifc network, we implement 'Network_module' function.
+To identify sample-specific modules from sample-specifc network, the 'Network_module' function is used.
+
+```{r, eval=TRUE, include=TRUE}
+Network_module_res <- Network_module(bulk_LIONESS_res)
+```
 
 ## Calculating sample-sample similarity matrix between two lists of sample-specific networks
 The function 'Sim.network' is used to calculate sample-sample similarity matrix between two list of sample-specific networks.
 
+```{r, eval=TRUE, include=TRUE}
+res <- Sim.network(bulk_LIONESS_res,  bulk_LIONESS_res)
+```
+
 ## Performing hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific networks
 The function 'Network_sim_hc' is implemented to perform hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific networks.
+
+```{r, eval=TRUE, include=TRUE}
+res <- Network_sim_hc(bulk_LIONESS_res)
+plot(res)
+```
 
 ## Calculating sample-sample similarity matrix between two lists of sample-specific hubs
 The function 'Sim.hub' is used to calculate sample-sample similarity matrix between two list of sample-specific hubs.
 
+```{r, eval=TRUE, include=TRUE}
+hubs <- Network_hub(bulk_LIONESS_res)
+res <- Sim.hub(hubs, hubs)
+```
+
 ## Performing hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific hubs
 The function 'Hub_sim_hc' is implemented to perform hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific hubs.
+
+```{r, eval=TRUE, include=TRUE}
+res <- Hub_sim_hc(hubs)
+plot(res)
+```
 
 ## Calculating sample-sample similarity matrix between two lists of sample-specific modules
 The function 'Sim.module' is used to calculate sample-sample similarity matrix between two list of sample-specific modules.
 
+```{r, eval=TRUE, include=TRUE}
+Network_module_res <- Network_module(bulk_LIONESS_res)
+res <- Sim.module(Network_module_res[[1]], Network_module_res[[2]])
+```
+
 ## Performing hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific modules
 The function 'Module_sim_hc' is implemented to perform hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific modules.
 
+```{r, eval=TRUE, include=TRUE}
+res <- Module_sim_hc(Network_module_res)
+plot(res)
+```
+
 # Conclusions
-S2N provides several built-in methods to infer and analyze sample-specific network, and it could provide a useful tool to explore sample-specific network from bulk RNA-seq, scRNA-seq, and ST data.
+S2N provides several built-in methods to infer and analyze sample-specific networks, and it could provide a useful tool to explore sample-specific networks from bulk RNA-seq, scRNA-seq, and ST data.
 
 # References
 [1] Liu X, Wang Y, Ji H, Aihara K, Chen L. Personalized characterization of diseases using sample-specific networks. Nucleic Acids Res. 2016;44(22):e164.
@@ -173,6 +271,18 @@ S2N provides several built-in methods to infer and analyze sample-specific netwo
 [6] Dai H, Li L, Zeng T, Chen L. Cell-specific network constructed by single-cell RNA sequencing data. Nucleic Acids Res. 2019;47(11):e62.
 
 [7] Zhang J, Liu L, Wei X, Zhao C, Luo Y, Li J, Le TD. Scanning sample-specific miRNA regulation from bulk and single-cell RNA-sequencing data. BMC Biol. 2024;22(1):218.
+
+[8] Chen HH, Hsueh CW, Lee CH, Hao TY, Tu TY, Chang LY, Lee JC, Lin CY. SWEET: a single-sample network inference method for deciphering individual features in disease. Brief Bioinform. 2023, 24(2):bbad032.
+
+[9] Chang LY, Hao TY, Wang WJ, Lin CY. Inference of single-cell network using mutual information for scRNA-seq data analysis. BMC Bioinformatics. 2024;25(Suppl 2):292.
+
+[10] Saha E, Fanfani V, Mandros P, Ben Guebila M, Fischer J, Shutta KH, DeMeo DL, Lopes-Ramos CM, Quackenbush J. Bayesian inference of sample-specific coexpression networks. Genome Res. 2024;34(9):1397-1410.
+
+[11] Cui S, Yu S, Huang HY, Lin YC, Huang Y, Zhang B, Xiao J, Zuo H, Wang J, Li Z, Li G, Ma J, Chen B, Zhang H, Fu J, Wang L, Huang HD. miRTarBase 2025: updates to the collection of experimentally validated microRNA-target interactions. Nucleic Acids Res. 2025;53(D1):D147-D156.
+
+[12] Skoufos G, Kakoulidis P, Tastsoglou S, Zacharopoulou E, Kotsira V, Miliotis M, Mavromati G, Grigoriadis D, Zioga M, Velli A, Koutou I, Karagkouni D, Stavropoulos S, Kardaras FS, Lifousi A, Vavalou E, Ovsepian A, Skoulakis A, Tasoulis SK, Georgakopoulos SV, Plagianakos VP, Hatzigeorgiou AG. TarBase-v9.0 extends experimentally supported miRNA-gene interactions to cell-types and virally encoded miRNAs. Nucleic Acids Res. 2024;52(D1):D304-D310.
+
+[13] Li B, Wang C, Wang Y, Li P, Liu ZP. RegNetwork 2025: an integrative data repository for gene regulatory networks in human and mouse. Nucleic Acids Res. 2025:gkaf779. doi: 10.1093/nar/gkaf779. 
 
 # Session information
 ```{r}
