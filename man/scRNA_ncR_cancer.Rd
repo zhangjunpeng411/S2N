@@ -3,12 +3,12 @@
 \docType{data}
 \name{scRNA_ncR_cancer}
 \alias{scRNA_ncR_cancer}
-\title{single-cell ncRNA expression data in breast cancer}
+\title{Single-cell ncRNA expression data in breast cancer}
 \format{
 scRNA_ncR_cancer: A data frame object with 736 barcodes of CID3946 breast cancer cells (columns) and 147 ncRNAs (rows).
 }
 \description{
-single-cell ncRNA expression data in breast cancer
+Single-cell ncRNA expression data in breast cancer
 }
 \details{
 The matched miRNA and lncRNA expression data in breast cancer cells is obtained from Wu et al.

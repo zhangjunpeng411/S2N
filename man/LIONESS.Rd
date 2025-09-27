@@ -11,10 +11,10 @@ LIONESS(reg_cancer, tar_cancer, cormethod = "pearson")
 
 \item{tar_cancer}{A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
 
-\item{cormethod}{A character string indicating which type of correlation coefficient is to be computed. One of "pearson" (default), "kendall", or "spearman" can be used.}
+\item{cormethod}{A character string indicating which type of correlation coefficient is to be computed. One of 'pearson' (default), 'kendall', or 'spearman' can be used.}
 }
 \value{
-A list object containing regulator-target interactions for each sample.
+An igraph object: a list of regulator-target interactions for each sample.
 }
 \description{
 Sample-specific network inferred with the LIONESS (Linear Interpolation to Obtain Network Estimates for Single Samples) method
@@ -22,15 +22,15 @@ Sample-specific network inferred with the LIONESS (Linear Interpolation to Obtai
 \examples{
 # bulk data
 data(bulk_ncR_tar_normal_cancer)
-bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = "pearson")
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
 
 # scRNA data
 data(scRNA_ncR_tar_normal_cancer)
-scRNA_LIONESS_res <- LIONESS(scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], cormethod = "pearson")
+scRNA_LIONESS_res <- LIONESS(scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], cormethod = 'pearson')
 
 # ST data
 data(ST_ncR_tar_cancer)
-ST_LIONESS_res <- LIONESS(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], cormethod = "pearson")
+ST_LIONESS_res <- LIONESS(ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], cormethod = 'pearson')
 
 }
 \references{

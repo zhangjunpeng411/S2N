@@ -3,12 +3,12 @@
 \docType{data}
 \name{scRNA_tar_count_cancer}
 \alias{scRNA_tar_count_cancer}
-\title{single-cell target gene count data in breast cancer}
+\title{Single-cell target gene count data in breast cancer}
 \format{
 scRNA_tar_count_cancer: A data frame object with 736 barcodes of CID3946 breast cancer cells (columns) and 9323 target genes (rows).
 }
 \description{
-single-cell target gene count data in breast cancer
+Single-cell target gene count data in breast cancer
 }
 \details{
 The matched lncRNA and mRNA count data is obtained from Wu et al.

@@ -4,10 +4,10 @@
 \alias{Network_sim_hc}
 \title{Network_sim_hc}
 \usage{
-Network_sim_hc(network, directed = TRUE, method = "Simpson")
+Network_sim_hc(network_graph, directed = FALSE, method = "Simpson")
 }
 \arguments{
-\item{network}{List object, a list of sample-specific networks.}
+\item{network_graph}{An igraph object, a list of sample-specific networks.}
 
 \item{directed}{A logical value indicating a network directed (TRUE) or undirected (FALSE).}
 
@@ -20,6 +20,9 @@ Hierarchical cluster analysis result of samples.
 Performing hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific networks
 }
 \examples{
-data(network)
-res <- Network_sim_hc(network)
+data(bulk_ncR_tar_normal_cancer)
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+res <- Network_sim_hc(bulk_LIONESS_res)
+plot(res)
+
 }

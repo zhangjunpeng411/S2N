@@ -11,15 +11,18 @@ Sim.hub(hub1, hub2, method = "Simpson")
 
 \item{hub2}{The second list of sample-specific hubs.}
 
-\item{method}{Methods for calculating similatiry between two two lists of sample-specific hubs, select one of three mrthods (Simpson, Jaccard and Lin). Default method is Simpson.}
+\item{method}{Methods for calculating similarity between two two lists of sample-specific hubs, select one of three mrthods (Simpson, Jaccard and Lin). Default method is Simpson.}
 }
 \value{
-Matrix object, a sample-sample similarity matrix in terms of sample-specific hubs.
+A matrix object, a sample-sample similarity matrix in terms of sample-specific hubs.
 }
 \description{
 Calculating sample-sample similarity matrix between two lists of sample-specific hubs
 }
 \examples{
-data(hub_ncRNAs)
-res <- Sim.hub(hub_ncRNAs, hub_ncRNAs)
+data(bulk_ncR_tar_normal_cancer)
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+hubs <- Network_hub(bulk_LIONESS_res)
+res <- Sim.hub(hubs, hubs)
+
 }

@@ -3,12 +3,12 @@
 \docType{data}
 \name{ST_ncR_count_cancer}
 \alias{ST_ncR_count_cancer}
-\title{spatial transcriptomics count data of lncRNA in breast cancer}
+\title{Spatial transcriptomics count data of lncRNA in breast cancer}
 \format{
 ST_ncR_cancer: A data frame object with 1057 barcodes of CID44971 breast cancer samples (columns) and 2110 lncRNAs (rows).
 }
 \description{
-spatial transcriptomics count data of lncRNA in breast cancer
+Spatial transcriptomics count data of lncRNA in breast cancer
 }
 \details{
 The spatial transcriptomics count data of lncRNAs in breast cancer is obtained from Wu et al.

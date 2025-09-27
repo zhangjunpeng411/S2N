@@ -7,7 +7,7 @@
 Hub_sim_hc(hub, method = "Simpson")
 }
 \arguments{
-\item{hub}{List object, a list of sample-specific hubs.}
+\item{hub}{A list object, a list of sample-specific hubs.}
 
 \item{method}{Methods for calculating similatiry between two two lists of sample-specific hubs, select one of three mrthods (Simpson, Jaccard and Lin). Default method is Simpson.}
 }
@@ -18,6 +18,10 @@ Hierarchical cluster analysis result of samples.
 Performing hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific hubs
 }
 \examples{
-data(hub_ncRNAs)
-res <- Hub_sim_hc(hub_ncRNAs)
+data(bulk_ncR_tar_normal_cancer)
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+hubs <- Network_hub(bulk_LIONESS_res)
+res <- Hub_sim_hc(hubs)
+plot(res)
+
 }

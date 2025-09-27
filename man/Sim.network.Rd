@@ -4,24 +4,24 @@
 \alias{Sim.network}
 \title{Sim.network}
 \usage{
-Sim.network(net1, net2, directed = TRUE, method = "Simpson")
+Sim.network(net1, net2, method = "Simpson")
 }
 \arguments{
-\item{net1}{The first list of sample-specific networks.}
+\item{net1}{The first list of sample-specific networks, an igraph object.}
 
-\item{net2}{The second list of sample-specific networks.}
-
-\item{directed}{A logical value indicating a network directed (TRUE) or undirected (FALSE).}
+\item{net2}{The second list of sample-specific networks, an igraph object.}
 
 \item{method}{Methods for calculating similatiry between two two lists of sample-specific networks, select one of three mrthods (Simpson, Jaccard and Lin). Default method is Simpson.}
 }
 \value{
-Matrix object, a sample-sample similarity matrix in terms of sample-specific networks.
+A matrix object, a sample-sample similarity matrix in terms of sample-specific networks.
 }
 \description{
 Calculating sample-sample similarity matrix between two lists of sample-specific networks
 }
 \examples{
-data(network)
-res <- Sim.network(network, network)
+data(bulk_ncR_tar_normal_cancer)
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+res <- Sim.network(bulk_LIONESS_res,  bulk_LIONESS_res)
+
 }

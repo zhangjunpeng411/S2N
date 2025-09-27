@@ -33,7 +33,7 @@ CSN(
 \item{num.cores}{The number of cores to run in parallel.}
 }
 \value{
-A list object containing regulator-target interactions for each sample.
+An igraph object: a list of regulator-target interactions for each sample.
 }
 \description{
 Sample-specific network inferred with the CSN (cell-specific network) method, adapted from the CSmiR method

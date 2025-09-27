@@ -7,37 +7,32 @@
 SCS(mut_reg, reg_cancer, tar_cancer, cormethod = "pearson", number = 50)
 }
 \arguments{
-\item{mut_reg}{A matrix object, containing a list of mutation regulators.}
+\item{mut_reg}{A matrix or data frame object, containing a list of mutation regulators.}
 
 \item{reg_cancer}{A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.}
 
 \item{tar_cancer}{A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
 
-\item{cormethod}{A character string indicating which type of correlation coefficient is to be computed. One of "pearson" (default), "kendall", or "spearman" can be used.}
+\item{cormethod}{A character string indicating which type of correlation coefficient is to be computed. One of 'pearson' (default), 'kendall', or 'spearman' can be used.}
 
 \item{number}{The number of RWR with random matrix.}
 }
 \value{
-A list object containing regulator-target interactions for each sample.
+An igraph object: a list of regulator-target interactions for each sample.
 }
 \description{
 Sample-specific network inferred with SCS (single-sample controller strategy) method
 }
 \examples{
-#bulk data
-data(bulk_ncR_tar_normal_cancer)
-data(mut_ncR)
-bulk_scs_res <- SCS(mut_ncR, bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = "pearson", number = 10)
-
 # scRNA data
 data(scRNA_ncR_tar_normal_cancer)
 data(mut_ncR)
-scRNA_scs_res <- SCS(mut_ncR, scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], cormethod = "pearson", number = 10)
+scRNA_SCS_res <- SCS(mut_ncR, scRNA_ncR_cancer[, 1:5], scRNA_tar_cancer[1:500, 1:5], cormethod = 'pearson', number = 10)
 
 # ST data
 data(ST_ncR_tar_cancer)
 data(mut_ncR)
-ST_scs_res <- SCS(mut_ncR, ST_ncR_cancer[1:100, 1:5], ST_tar_cancer[1:500, 1:5], cormethod = "pearson", number = 10)
+ST_SCS_res <- SCS(mut_ncR, ST_ncR_cancer[, 1:5], ST_tar_cancer[1:500, 1:5], cormethod = 'pearson', number = 10)
 
 }
 \references{

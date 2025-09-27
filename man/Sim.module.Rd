@@ -7,15 +7,22 @@
 Sim.module(Module1, Module2, method = "Simpson")
 }
 \arguments{
-\item{Module1}{List object, the first list of modules.}
+\item{Module1}{A list object, the first list of modules.}
 
-\item{Module2}{List object, the second list of modules.}
+\item{Module2}{A list object, the second list of modules.}
 
 \item{method}{Methods for calculating similatiry between two modules, select one of three mrthods (Simpson, Jaccard and Lin). Default method is Simpson.}
 }
 \value{
-Matrix object, a sample-sample similarity matrix in terms of sample-specific modules.
+A matrix object, a sample-sample similarity matrix in terms of sample-specific modules.
 }
 \description{
 Calculating sample-sample similarity matrix between two lists of sample-specific modules
+}
+\examples{
+data(bulk_ncR_tar_normal_cancer)
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+Network_module_res <- Network_module(bulk_LIONESS_res)
+res <- Sim.module(Network_module_res[[1]], Network_module_res[[2]])
+
 }

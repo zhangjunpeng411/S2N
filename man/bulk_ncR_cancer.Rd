@@ -3,12 +3,12 @@
 \docType{data}
 \name{bulk_ncR_cancer}
 \alias{bulk_ncR_cancer}
-\title{bulk ncRNA expression data in breast cancer}
+\title{Bulk ncRNA expression data in breast cancer}
 \format{
 bulk_ncR_cancer: A data frame object with six BRCA samples (columns) and 4794 ncRNAs (rows).
 }
 \description{
-bulk ncRNA expression data in breast cancer
+Bulk ncRNA expression data in breast cancer
 }
 \details{
 The matched miRNA and lncRNA expression data in breast cancer is obtained from TCGA (http://cancergenome.nih.gov/).

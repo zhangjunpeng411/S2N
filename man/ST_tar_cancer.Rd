@@ -3,12 +3,12 @@
 \docType{data}
 \name{ST_tar_cancer}
 \alias{ST_tar_cancer}
-\title{spatial transcriptomics data of mRNA in breast cancer}
+\title{Spatial transcriptomics data of mRNA in breast cancer}
 \format{
 ST_tar_cancer: A data frame object with 1057 barcodes of CID44971 breast cancer samples (columns) and 14801 mRNAs (rows).
 }
 \description{
-spatial transcriptomics data of mRNA in breast cancer
+Spatial transcriptomics data of mRNA in breast cancer
 }
 \details{
 The spatial transcriptomics data of mRNAs in breast cancer is obtained from Wu et al.

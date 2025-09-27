@@ -3,12 +3,12 @@
 \docType{data}
 \name{scRNA_tar_normal}
 \alias{scRNA_tar_normal}
-\title{single-cell target gene expression data in normal breast}
+\title{Single-cell target gene expression data in normal breast}
 \format{
 scRNA_tar_normal: A data frame object with 2430 barcodes of normal breast cells (columns) and 11226 ncRNAs (rows).
 }
 \description{
-single-cell target gene expression data in normal breast
+Single-cell target gene expression data in normal breast
 }
 \details{
 The matched miRNA and lncRNA expression data in normal breast cells is obtained from GEO (GSE15388).

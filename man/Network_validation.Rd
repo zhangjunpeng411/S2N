@@ -4,15 +4,19 @@
 \alias{Network_validation}
 \title{Network_validation}
 \usage{
-Network_validation(network, groundtruth)
+Network_validation(network_graph, groundtruth, directed = FALSE, num.cores = 2)
 }
 \arguments{
-\item{network}{List object: a list of sample-specific networks.}
+\item{network_graph}{An igraph object: a list of sample-specific networks.}
 
-\item{groundtruth}{A data frame object, experimentally validated RNA-RNA interactions}
+\item{groundtruth}{A data frame object, experimentally validated interactions.}
+
+\item{directed}{A logical value indicating a network directed (TRUE) or undirected (FALSE).}
+
+\item{num.cores}{Number of CPU cores when parallel computation.}
 }
 \value{
-List object: a list of validated RNA-RNA interactions for each sample.
+A list object: a list of validated interactions for each sample.
 }
 \description{
 Validating sample-specific network

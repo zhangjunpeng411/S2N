@@ -4,24 +4,26 @@
 \alias{Network_hub}
 \title{Network_hub}
 \usage{
-Network_hub(network, directed = TRUE, top_percentage = 0.2)
+Network_hub(network_graph, directed = FALSE, top_percentage = 0.2)
 }
 \arguments{
-\item{network}{List object: a list of of sample-specific networks.}
+\item{network_graph}{An igraph object: a list of of sample-specific networks.}
 
 \item{directed}{A logical value indicating a network directed (TRUE) or undirected (FALSE).}
 
 \item{top_percentage}{A number indicating the top percenatge of hub regulators, default 0.2.}
 }
 \value{
-List object: a list of hub regulators for each sample.
+A list object: a list of hubs for each sample.
 }
 \description{
-Identifying sample-specific hub regulators
+Identifying sample-specific hubs
 }
 \examples{
-data(network)
-hubs <- Network_hub(network)
+data(bulk_ncR_tar_normal_cancer)
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+hubs <- Network_hub(bulk_LIONESS_res)
+
 }
 \references{
 Zhang J, Liu L, Xu T, Zhang W, Zhao C, Li S, Li J, Rao N, Le TD. Exploring cell-specific miRNA regulation with single-cell miRNA-mRNA co-sequencing data. BMC Bioinformatics.2021; 22(1):578.

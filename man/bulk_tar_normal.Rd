@@ -3,12 +3,12 @@
 \docType{data}
 \name{bulk_tar_normal}
 \alias{bulk_tar_normal}
-\title{bulk target gene expression data in normal breast}
+\title{Bulk target gene expression data in normal breast}
 \format{
 bulk_tar_normal: A dataframe object with six normal samples (columns) and 22427 target genes (rows).
 }
 \description{
-bulk target gene expression data in normal breast
+Bulk target gene expression data in normal breast
 }
 \details{
 The matched lncRNA and mRNA expression data in normal breast is obtained from TCGA (http://cancergenome.nih.gov/).

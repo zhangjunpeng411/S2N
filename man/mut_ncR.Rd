@@ -3,12 +3,12 @@
 \docType{data}
 \name{mut_ncR}
 \alias{mut_ncR}
-\title{mutation data}
+\title{Mutation data}
 \format{
 mut_ncR: A character object with 158 SNV genes.
 }
 \description{
-mutation data
+Mutation data
 }
 \details{
 The mutation genes are collected from miRNASNP v3.0 (http://bioinfo.life.hust.edu.cn/miRNASNP/#!/) and lncRNASNP v3.0 (http://bioinfo.life.hust.edu.cn/lncRNASNP#!/) databases.

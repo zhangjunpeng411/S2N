@@ -3,12 +3,12 @@
 \docType{data}
 \name{scRNA_ncR_normal}
 \alias{scRNA_ncR_normal}
-\title{single-cell ncRNA expression data in normal breast}
+\title{Single-cell ncRNA expression data in normal breast}
 \format{
 scRNA_ncR_normal: A data frame object with 2430 barcodes of normal breast cells (columns) and 343 ncRNAs (rows).
 }
 \description{
-single-cell ncRNA expression data in normal breast
+Single-cell ncRNA expression data in normal breast
 }
 \details{
 The matched miRNA and lncRNA expression data in normal breast cells is obtained from GEO (GSE153889).

@@ -7,13 +7,21 @@
 Module_sim_hc(module, method = "Simpson")
 }
 \arguments{
-\item{module}{List object, a list of sample-specific module groups. Each module group contain a list of modules.}
+\item{module}{A list object, a list of sample-specific module groups. Each module group contain a list of modules.}
 
-\item{method}{Methods for calculating similatiry between two lists of sample-specific modules, select one of three mrthods (Simpson, Jaccard and Lin). Default method is Simpson.}
+\item{method}{Methods for calculating similarity between two lists of sample-specific modules, select one of three mrthods (Simpson, Jaccard and Lin). Default method is Simpson.}
 }
 \value{
 Hierarchical cluster analysis result of samples.
 }
 \description{
 Performing hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific modules
+}
+\examples{
+data(bulk_ncR_tar_normal_cancer)
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+Network_module_res <- Network_module(bulk_LIONESS_res)
+res <- Module_sim_hc(Network_module_res)
+plot(res)
+
 }

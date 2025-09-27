@@ -22,12 +22,12 @@ PairedSSN(
 
 \item{tar_cancer}{A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
 
-\item{cormethod}{A character string indicating which type of correlation coefficient is to be computed. One of "pearson" (default), "kendall", or "spearman" can be used.}
+\item{cormethod}{A character string indicating which type of correlation coefficient is to be computed. One of 'pearson' (default), 'kendall', or 'spearman' can be used.}
 
 \item{p.value.cutoff}{Significance p-value for identifying sample-specific regulatory network}
 }
 \value{
-A list object containing regulator-target interactions for each sample.
+An igraph object: a list of regulator-target interactions for each sample.
 }
 \description{
 Sample-specific network inferred with the Paired-SSN (paired single sample network) method
@@ -35,11 +35,11 @@ Sample-specific network inferred with the Paired-SSN (paired single sample netwo
 \examples{
 # bulk data
 data(bulk_ncR_tar_normal_cancer)
-bulk_PaiedSSN_res <- PairedSSN(bulk_ncR_normal[1:100, ], bulk_tar_normal[1:500, ], bulk_ncR_cancer[1:100, ], bulk_tar_cancer[1:500, ], cormethod = "pearson")
+bulk_PaiedSSN_res <- PairedSSN(bulk_ncR_normal[1:100, 1:5], bulk_tar_normal[1:500, 1:5], bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
 
 # scRNA data
 data(scRNA_ncR_tar_normal_cancer)
-scRNA_PaiedSSN_res <- PairedSSN(scRNA_ncR_normal[1:100, 1:5], scRNA_tar_normal[1:500, 1:5], scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], cormethod = "pearson")
+scRNA_PaiedSSN_res <- PairedSSN(scRNA_ncR_normal[1:100, 1:5], scRNA_tar_normal[1:500, 1:5], scRNA_ncR_cancer[1:100, 1:5], scRNA_tar_cancer[1:500, 1:5], cormethod = 'pearson')
 
 }
 \references{
