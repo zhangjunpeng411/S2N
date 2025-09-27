@@ -1,14 +1,14 @@
 Package: S2N
 Type: Package
-Title: Inferring sample-specific network from transcriptomic data
+Title: Inferring sample-specific networks from transcriptomic data
 Version: 1.0.0
 Authors@R: c(
     person(given = "Junpeng", family = "Zhang", email = "zjp@dali.edu.cn", role  = c("aut", "cre"), comment = c(ORCID = "0000-0001-6127-9701")),
     person(given = "Chenchen", family = "Xiong", email = "xiongchenchen_0730@126.com", role  = c("aut"))    
 	)
 Maintainer: Junpeng Zhang <zjp@dali.edu.cn>
-Description: This package collects a variety of computational methods to infer sample-specific network (a network for a sample),
-    and includes serveral utility functions for downstream analysis of sample-specific network.
+Description: This package collects a variety of computational methods to infer sample-specific networks (a network for a sample) from transcriptomic data,
+    and includes serveral utility functions for downstream analysis of sample-specific networks.
 License: GPL-3
 Encoding: UTF-8
 LazyData: false
@@ -16,7 +16,6 @@ Imports: igraph,
     pracma,
     WGCNA,
     MCL,
-    linkcomm,
     foreach,
     doParallel,
     parallel,
@@ -24,7 +23,9 @@ Imports: igraph,
     Matrix,
     methods,
     stats,
-    utils
+    utils,
+    entropy,
+    infotheo
 Suggests: BiocStyle, knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 RoxygenNote: 7.3.2
