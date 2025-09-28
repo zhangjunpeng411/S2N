@@ -25,6 +25,9 @@ data(scRNA_ncR_tar_count_cancer)
 data(ST_ncR_tar_cancer)
 data(ST_ncR_tar_count_cancer)
 data(mut_ncR)
+data(miRTarget_Groundtruth)
+data(lncRTarget_Groundtruth)
+data(TFTarget_Groundtruth)
 ```
 
 # Inferring sample-specific networks

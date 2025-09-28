@@ -4,14 +4,15 @@ NULL
 #' Sample-specific network inferred with the SSN (single-sample network) method
 #'
 #' @title SSN
-#' @param reg_normal A data frame object, the input regulator expression data in normal samples, columns are samples and rows are regulators.
-#' @param tar_normal A data frame object, the input target gene expression data in normal samples, columns are samples and rows are target genes.
-#' @param reg_cancer A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
+#' @param reg_normal A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in normal samples, columns are samples and rows are regulators.
+#' @param tar_normal A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in normal samples, columns are samples and rows are target genes.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param cormethod A character string indicating which type of correlation coefficient is to be computed. One of 'pearson' (default), 'kendall', or 'spearman' can be used.
 #' @param p.value.cutoff Significance p-value for identifying sample-specific regulatory network
 #' @import utils
 #' @import stats
+#' @import SummarizedExperiment
 #' @return An igraph object: a list of regulator-target interactions for each sample.
 #' @examples
 #'
@@ -29,6 +30,15 @@ NULL
 #' @export
 SSN <- function(reg_normal, tar_normal, reg_cancer, tar_cancer, cormethod = "pearson",
     p.value.cutoff = 0.05) {
+
+    if(is(reg_normal, "SummarizedExperiment") ||
+       is(reg_normal, "SingleCellExperiment") ||
+       is(reg_normal, "SpatialExperiment")){
+      reg_normal <- as.matrix(assay(reg_normal))
+      tar_normal <- as.matrix(assay(tar_normal))
+      reg_cancer <- as.matrix(assay(reg_cancer))
+      tar_cancer <- as.matrix(assay(tar_cancer))
+    }
 
     valid_reg <- intersect(rownames(reg_normal), rownames(reg_cancer))
     valid_reg <- valid_reg[!is.na(valid_reg)]
@@ -91,14 +101,15 @@ SSN <- function(reg_normal, tar_normal, reg_cancer, tar_cancer, cormethod = "pea
 #' Sample-specific network inferred with the Paired-SSN (paired single sample network) method
 #'
 #' @title PairedSSN
-#' @param reg_normal A data frame object, the input regulator expression data in normal samples, columns are samples and rows are regulators.
-#' @param tar_normal A data frame object, the input target gene expression data in normal samples, columns are samples and rows are target genes.
-#' @param reg_cancer A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
+#' @param reg_normal A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in normal samples, columns are samples and rows are regulators.
+#' @param tar_normal A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in normal samples, columns are samples and rows are target genes.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param cormethod A character string indicating which type of correlation coefficient is to be computed. One of 'pearson' (default), 'kendall', or 'spearman' can be used.
 #' @param p.value.cutoff Significance p-value for identifying sample-specific regulatory network
 #' @import utils
 #' @import stats
+#' @import SummarizedExperiment
 #' @return An igraph object: a list of regulator-target interactions for each sample.
 #'
 #' @examples
@@ -116,6 +127,15 @@ SSN <- function(reg_normal, tar_normal, reg_cancer, tar_cancer, cormethod = "pea
 #' @export
 PairedSSN <- function(reg_normal, tar_normal, reg_cancer, tar_cancer, cormethod = "pearson",
     p.value.cutoff = 0.05) {
+
+   if(is(reg_normal, "SummarizedExperiment") ||
+      is(reg_normal, "SingleCellExperiment") ||
+      is(reg_normal, "SpatialExperiment")){
+     reg_normal <- as.matrix(assay(reg_normal))
+     tar_normal <- as.matrix(assay(tar_normal))
+     reg_cancer <- as.matrix(assay(reg_cancer))
+     tar_cancer <- as.matrix(assay(tar_cancer))
+   }
 
     reg_intersect <- intersect(rownames(reg_normal), rownames(reg_cancer))
     reg_intersect <- reg_intersect[!is.na(reg_intersect)]
@@ -165,11 +185,12 @@ PairedSSN <- function(reg_normal, tar_normal, reg_cancer, tar_cancer, cormethod 
 #' Sample-specific network inferred with the LIONESS (Linear Interpolation to Obtain Network Estimates for Single Samples) method
 #'
 #' @title LIONESS
-#' @param reg_cancer A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param cormethod A character string indicating which type of correlation coefficient is to be computed. One of 'pearson' (default), 'kendall', or 'spearman' can be used.
 #' @import stats
 #' @import utils
+#' @import SummarizedExperiment
 #' @return An igraph object: a list of regulator-target interactions for each sample.
 #' @references
 #' Kuijjer ML, Tung MG, Yuan G, Quackenbush J, Glass K. Estimating Sample-Specific Regulatory Networks. iScience. 2019;14:226-240.
@@ -189,6 +210,13 @@ PairedSSN <- function(reg_normal, tar_normal, reg_cancer, tar_cancer, cormethod 
 #'
 #' @export
 LIONESS <- function(reg_cancer, tar_cancer, cormethod = "pearson") {
+
+    if(is(reg_cancer, "SummarizedExperiment") ||
+       is(reg_cancer, "SingleCellExperiment") ||
+       is(reg_cancer, "SpatialExperiment")){
+      reg_cancer <- as.matrix(assay(reg_cancer))
+      tar_cancer <- as.matrix(assay(tar_cancer))
+    }
 
     N <- ncol(reg_cancer)
     PCC <- cor(x = t(reg_cancer), y = t(tar_cancer), method = cormethod)
@@ -226,8 +254,8 @@ LIONESS <- function(reg_cancer, tar_cancer, cormethod = "pearson") {
 #'
 #' @title SCS
 #' @param mut_reg A matrix or data frame object, containing a list of mutation regulators.
-#' @param reg_cancer A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param cormethod A character string indicating which type of correlation coefficient is to be computed. One of 'pearson' (default), 'kendall', or 'spearman' can be used.
 #' @param number  The number of RWR with random matrix.
 #' @import stats
@@ -236,6 +264,7 @@ LIONESS <- function(reg_cancer, tar_cancer, cormethod = "pearson") {
 #' @import Matrix
 #' @import methods
 #' @import utils
+#' @import SummarizedExperiment
 #' @return An igraph object: a list of regulator-target interactions for each sample.
 #' @references
 #' Guo WF, Zhang SW, Liu LL, Liu F, Shi QQ, Zhang L, Tang Y, Zeng T, Chen L. Discovering personalized driver mutation profiles of single samples in cancer by network control strategy. Bioinformatics. 2018;34(11):1893-1903.
@@ -254,6 +283,13 @@ LIONESS <- function(reg_cancer, tar_cancer, cormethod = "pearson") {
 #' @export
 #'
 SCS <- function(mut_reg, reg_cancer, tar_cancer, cormethod = "pearson", number = 50) {
+
+    if(is(reg_cancer, "SummarizedExperiment") ||
+       is(reg_cancer, "SingleCellExperiment") ||
+       is(reg_cancer, "SpatialExperiment")){
+      reg_cancer <- as.matrix(assay(reg_cancer))
+      tar_cancer <- as.matrix(assay(tar_cancer))
+    }
 
     edge0 <- expand.grid(regulator = mut_reg, target = rownames(tar_cancer))
     colnames(edge0) <- c("regulator", "target")
@@ -358,8 +394,8 @@ SCS <- function(mut_reg, reg_cancer, tar_cancer, cormethod = "pearson", number =
 #' Sample-specific network inferred with the CSN (cell-specific network) method, adapted from the CSmiR method
 #'
 #' @title CSN
-#' @param reg_cancer A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param boxsize Size of neighborhood (0.1 in default).
 #' @param bootstrap A logic value, TRUE for bootstrap. If the number of samples is less than 100, boostrap is recommended.
 #' @param bootstrap_betw_point The number of interpolation points between each cell (5 in default), bootstrap_betw_point = 0 is used to compute.
@@ -373,6 +409,7 @@ SCS <- function(mut_reg, reg_cancer, tar_cancer, cormethod = "pearson", number =
 #' @import parallel
 #' @import foreach
 #' @import doParallel
+#' @import SummarizedExperiment
 #' @importFrom WGCNA pmedian
 #' @return An igraph object: a list of regulator-target interactions for each sample.
 #' @references
@@ -395,6 +432,13 @@ SCS <- function(mut_reg, reg_cancer, tar_cancer, cormethod = "pearson", number =
 #' @export
 CSN <- function(reg_cancer, tar_cancer, boxsize = 0.1, bootstrap = FALSE, bootstrap_betw_point = 5,
     bootstrap_num = 100, p.value.cutoff = 0.05, num.cores = 2) {
+
+    if(is(reg_cancer, "SummarizedExperiment") ||
+       is(reg_cancer, "SingleCellExperiment") ||
+       is(reg_cancer, "SpatialExperiment")){
+      reg_cancer <- as.matrix(assay(reg_cancer))
+      tar_cancer <- as.matrix(assay(tar_cancer))
+    }
 
     reg_cancer <- data.frame(reg_cancer)
     tar_cancer <- data.frame(tar_cancer)
@@ -422,8 +466,8 @@ CSN <- function(reg_cancer, tar_cancer, boxsize = 0.1, bootstrap = FALSE, bootst
 #' Identifying sample-specific ncRNA regulation using Scan (Sample-speCific miRNA regulAtioN) and statistical perturbation strategy
 #'
 #' @title Scan.perturb
-#' @param reg_cancer A data frame object, regulator expression data with columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, target expression data with columns are samples and rows are targets.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param method Methods for calculating correlations, one of 'pearson', 'spearman', 'kendall'.
 #' @param p.value.cutoff Significance level for the identified regulator-target interactions.
 #' @param num.cores Number of CPU cores when parallel computation.
@@ -432,6 +476,7 @@ CSN <- function(reg_cancer, tar_cancer, boxsize = 0.1, bootstrap = FALSE, bootst
 #' @import parallel
 #' @import foreach
 #' @import doParallel
+#' @import SummarizedExperiment
 #' @importFrom WGCNA cor
 #' @importFrom WGCNA corAndPvalue
 #' @return An igraph object: a list of regulator-target interactions for each sample.
@@ -455,6 +500,13 @@ CSN <- function(reg_cancer, tar_cancer, boxsize = 0.1, bootstrap = FALSE, bootst
 #' @export
 Scan.perturb <- function(reg_cancer, tar_cancer, method = c("pearson", "spearman",
     "kendall"), p.value.cutoff = 0.05, num.cores = 2) {
+
+    if(is(reg_cancer, "SummarizedExperiment") ||
+       is(reg_cancer, "SingleCellExperiment") ||
+       is(reg_cancer, "SpatialExperiment")){
+      reg_cancer <- as.matrix(assay(reg_cancer))
+      tar_cancer <- as.matrix(assay(tar_cancer))
+    }
 
     if (method == "pearson") {
         res.all <- Pearson_adj(reg_cancer, tar_cancer, p.value.cutoff)
@@ -517,8 +569,8 @@ Scan.perturb <- function(reg_cancer, tar_cancer, method = c("pearson", "spearman
 #' Identifying sample-specific ncRNA regulation using Scan (Sample-speCific miRNA regulAtioN) and linear interpolation strategy
 #'
 #' @title Scan.interp
-#' @param reg_cancer A data frame object, regulator expression data with columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, target expression data with columns are samples and rows are targets.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param method Methods for calculating correlations, one of 'pearson', 'spearman', 'kendall'.
 #' @param p.value.cutoff Significance level for the identified regulator-target interactions.
 #' @param num.cores Number of CPU cores when parallel computation.
@@ -527,6 +579,7 @@ Scan.perturb <- function(reg_cancer, tar_cancer, method = c("pearson", "spearman
 #' @import parallel
 #' @import foreach
 #' @import doParallel
+#' @import SummarizedExperiment
 #' @importFrom WGCNA cor
 #' @importFrom WGCNA corAndPvalue#'
 #' @return An igraph object: a list of regulator-target interactions for each sample.
@@ -550,6 +603,13 @@ Scan.perturb <- function(reg_cancer, tar_cancer, method = c("pearson", "spearman
 #' @export
 Scan.interp <- function(reg_cancer, tar_cancer, method = c("pearson", "spearman",
     "kendall"), p.value.cutoff = 0.05, num.cores = 2) {
+
+    if(is(reg_cancer, "SummarizedExperiment") ||
+       is(reg_cancer, "SingleCellExperiment") ||
+       is(reg_cancer, "SpatialExperiment")){
+      reg_cancer <- as.matrix(assay(reg_cancer))
+      tar_cancer <- as.matrix(assay(tar_cancer))
+    }
 
     reg_cancer <- t(reg_cancer)
     tar_cancer <- t(tar_cancer)
@@ -617,11 +677,12 @@ Scan.interp <- function(reg_cancer, tar_cancer, method = c("pearson", "spearman"
 #' Sample-specific network inferred with the SWEET (Sample-specific weighted correlation network) method
 #'
 #' @title SWEET
-#' @param reg_cancer A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param dismethod A character string indicating which type of distance is to be computed. One of 'euclidean' (default), or 'correlation' can be used.
 #' @param threshold The cutoff of correlation strength.
 #' @import stats
+#' @import SummarizedExperiment
 #' @importFrom igraph graph_from_biadjacency_matrix
 #' @return An igraph object: a list of regulator-target interactions for each sample.
 #'
@@ -643,6 +704,13 @@ Scan.interp <- function(reg_cancer, tar_cancer, method = c("pearson", "spearman"
 #'
 #' @export
 SWEET <- function(reg_cancer, tar_cancer, dismethod = "euclidean", threshold = 0.7) {
+
+    if(is(reg_cancer, "SummarizedExperiment") ||
+       is(reg_cancer, "SingleCellExperiment") ||
+       is(reg_cancer, "SpatialExperiment")){
+      reg_cancer <- as.matrix(assay(reg_cancer))
+      tar_cancer <- as.matrix(assay(tar_cancer))
+    }
 
    # calculate distances between samples
    expr <- rbind(reg_cancer, tar_cancer)
@@ -693,8 +761,8 @@ SWEET <- function(reg_cancer, tar_cancer, dismethod = "euclidean", threshold = 0
 #' Sample-specific network inferred with the SINUM (SIngle-cell Network Using Mutual information) method
 #'
 #' @title SINUM
-#' @param reg_cancer A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param boxsize Size of neighborhood (0.2 in default).
 #' @param zscore.cutoff Zscore cutoff for identifying sample-specific regulatory network.
 #' @param num.cores The number of cores to run in parallel.
@@ -706,6 +774,7 @@ SWEET <- function(reg_cancer, tar_cancer, dismethod = "euclidean", threshold = 0
 #' @import foreach
 #' @import doParallel
 #' @import igraph
+#' @import SummarizedExperiment
 #' @return An igraph object: a list of regulator-target interactions for each sample.
 #'
 #' @references
@@ -726,6 +795,13 @@ SWEET <- function(reg_cancer, tar_cancer, dismethod = "euclidean", threshold = 0
 #'
 #' @export
 SINUM <- function(reg_cancer, tar_cancer, boxsize = 0.2, zscore.cutoff = 0, num.cores = 2) {
+
+    if(is(reg_cancer, "SummarizedExperiment") ||
+       is(reg_cancer, "SingleCellExperiment") ||
+       is(reg_cancer, "SpatialExperiment")){
+      reg_cancer <- as.matrix(assay(reg_cancer))
+      tar_cancer <- as.matrix(assay(tar_cancer))
+    }
 
     # Combine regulatory and target cancer data
     GEM <- rbind(reg_cancer, tar_cancer)
@@ -858,11 +934,12 @@ SINUM <- function(reg_cancer, tar_cancer, boxsize = 0.2, zscore.cutoff = 0, num.
 #' Sample-specific network inferred with the BONOBO (Bayesian Optimized Networks Obtained By assimilating Omics data) method
 #'
 #' @title BONOBO
-#' @param reg_cancer A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
-#' @param tar_cancer A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
+#' @param reg_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.
+#' @param tar_cancer A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.
 #' @param p.value.cutoff pvalue cutoff for identifying sample-specific regulatory network.
 #' @import stats
 #' @import igraph
+#' @import SummarizedExperiment
 #' @return An igraph object: a list of regulator-target interactions for each sample.
 #'
 #' @references
@@ -883,6 +960,13 @@ SINUM <- function(reg_cancer, tar_cancer, boxsize = 0.2, zscore.cutoff = 0, num.
 #'
 #' @export
 BONOBO <- function(reg_cancer, tar_cancer, p.value.cutoff = 0.05) {
+
+  if(is(reg_cancer, "SummarizedExperiment") ||
+     is(reg_cancer, "SingleCellExperiment") ||
+     is(reg_cancer, "SpatialExperiment")){
+    reg_cancer <- as.matrix(assay(reg_cancer))
+    tar_cancer <- as.matrix(assay(tar_cancer))
+  }
 
   # Number of regulators and targets
   RegTot <- nrow(reg_cancer)

@@ -25,7 +25,8 @@ Imports: igraph,
     stats,
     utils,
     entropy,
-    infotheo
+    infotheo,
+    SummarizedExperiment
 Suggests: BiocStyle, knitr, rmarkdown, testthat
 VignetteBuilder: knitr
 RoxygenNote: 7.3.2
