@@ -5,14 +5,15 @@
 \alias{lncRTarget_Groundtruth}
 \title{Groundtruth of lncRNA-target interactions}
 \format{
-lncRTarget_Groundtruth: A data frame object with 3,039,533 lncRRNA-target interactions.
+lncRTarget_Groundtruth: A data frame object with 3,039,533 lncRNA-target interactions.
 }
 \description{
 Groundtruth of lncRNA-target interactions
 }
 \details{
-The groundtruth of lncRRNA-target interactions are from RegNetwork v2025.
+The groundtruth of lncRNA-target interactions are from RegNetwork v2025.
 }
 \references{
-Li B, Wang C, Wang Y, Li P, Liu ZP. RegNetwork 2025: an integrative data repository for gene regulatory networks in human and mouse. Nucleic Acids Res. 2025:gkaf779. doi: 10.1093/nar/gkaf779.
+Li B, Wang C, Wang Y, Li P, Liu ZP. RegNetwork 2025: an integrative data repository for gene regulatory networks in human and mouse.
+Nucleic Acids Res. 2025:gkaf779. doi: 10.1093/nar/gkaf779.
 }
