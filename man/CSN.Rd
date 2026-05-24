@@ -10,15 +10,15 @@ CSN(
   boxsize = 0.1,
   bootstrap = FALSE,
   bootstrap_betw_point = 5,
-  bootstrap_num = 100,
+  bootstrap_num = 10,
   p.value.cutoff = 0.05,
   num.cores = 2
 )
 }
 \arguments{
-\item{reg_cancer}{A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.}
+\item{reg_cancer}{A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.}
 
-\item{tar_cancer}{A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
+\item{tar_cancer}{A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
 
 \item{boxsize}{Size of neighborhood (0.1 in default).}
 

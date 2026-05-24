@@ -5,7 +5,7 @@
 \alias{bulk_ncR_normal}
 \title{Bulk ncRNA expression data in normal breast}
 \format{
-bulk_ncR_normal: A data frame object with six normal samples (columns) and 4929 ncRNAs (rows).
+bulk_ncR_normal: A data frame object with 6 normal samples (columns) and 4929 ncRNAs (rows).
 }
 \description{
 Bulk ncRNA expression data in normal breast

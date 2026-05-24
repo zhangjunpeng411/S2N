@@ -2,22 +2,34 @@
 % Please edit documentation in R/S2N.R
 \name{Network_validation}
 \alias{Network_validation}
-\title{Network_validation}
+\title{Validating sample-specific network}
 \usage{
-Network_validation(network_graph, groundtruth, directed = FALSE, num.cores = 2)
+Network_validation(
+  network_graph,
+  groundtruth,
+  num.cores = 2,
+  calculate_metrics = FALSE
+)
 }
 \arguments{
-\item{network_graph}{An igraph object: a list of sample-specific networks.}
+\item{network_graph}{List of igraph objects.}
 
-\item{groundtruth}{A data frame object, experimentally validated interactions.}
+\item{groundtruth}{Data frame of validated edges (two columns).}
 
-\item{directed}{A logical value indicating a network directed (TRUE) or undirected (FALSE).}
+\item{num.cores}{CPU cores.}
 
-\item{num.cores}{Number of CPU cores when parallel computation.}
+\item{calculate_metrics}{If TRUE, also returns Accuracy, F1, AUPRC, Validated_Percentage.}
 }
 \value{
-A list object: a list of validated interactions for each sample.
+If calculate_metrics=FALSE, list of igraph intersection graphs.
+  If TRUE, list with `edges` (igraph objects) and `metrics`.
 }
 \description{
 Validating sample-specific network
+}
+\references{
+Cui S, Yu S, Huang H-Y, Lin Y-C-D, Huang Y, Zhang B, Xiao J, Zuo H, Wang J, Li Z, et al. miRTarBase 2025: updates to the collection of experimentally validated microRNA-target interactions. Nucleic Acids Research. 2025;53(D1):D147–D156.
+Skoufos G, Kakoulidis P, Tastsoglou S, Zacharopoulou E, Kotsira V, Miliotis M, Mavromati G, Grigoriadis D, Zioga M, Velli A, et al. TarBase-v9.0 extends experimentally supported miRNA-gene interactions to cell-types and virally encoded miRNAs. Nucleic Acids Research. 2024;52(D1):D304–D310.
+Müller-Dott S, Tsirvouli E, Vazquez M, Ramirez Flores RO, Badia-I-Mompel P, Fallegger R, Türei D, Lægreid A, Saez-Rodriguez J. Expanding the coverage of regulons from high-confidence prior knowledge for accurate estimation of transcription factor activities. Nucleic Acids Research. 2023;51(20):10934–10949.
+Li B, Wang C, Wang Y, Li P, Liu Z-P. RegNetwork 2025: an integrative data repository for gene regulatory networks in human and mouse. Nucleic Acids Research. 2025 Aug 13:gkaf779.
 }

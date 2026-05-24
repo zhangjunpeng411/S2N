@@ -4,27 +4,59 @@
 \alias{Network_hub}
 \title{Network_hub}
 \usage{
-Network_hub(network_graph, directed = FALSE, top_percentage = 0.2)
+Network_hub(
+  network_graph,
+  directed = TRUE,
+  top_percentage = 0.2,
+  centrality_methods = "degree",
+  combine_method = c("intersection", "union", "majority", "rank_mean"),
+  mode = NULL
+)
 }
 \arguments{
-\item{network_graph}{An igraph object: a list of of sample-specific networks.}
+\item{network_graph}{A list of igraph objects, each representing a sample-specific network.}
 
-\item{directed}{A logical value indicating a network directed (TRUE) or undirected (FALSE).}
+\item{directed}{Logical, whether the network is directed (TRUE) or undirected (FALSE).}
 
-\item{top_percentage}{A number indicating the top percenatge of hub regulators, default 0.2.}
+\item{top_percentage}{Numeric, top percentage of nodes to consider as hubs (default 0.2).}
+
+\item{centrality_methods}{Character vector of centrality measures to use.
+Supported: `"degree"`, `"strength"`, `"betweenness"`, `"closeness"`,
+`"eigenvector"`, `"pagerank"`, `"hub_score"`, `"authority_score"`,
+`"subgraph"`, `"harmonic"`, `"kcore"`. Default `"degree"` ensures backward compatibility.}
+
+\item{combine_method}{Character, how to combine hubs from multiple centrality methods.
+Options:
+\describe{
+  \item{`"intersection"`}{Node must be a hub in **all** selected centrality methods.}
+  \item{`"union"`}{Node must be a hub in **at least one** centrality method. }
+  \item{`"majority"`}{Node must be a hub in **more than half** of the selected methods. }
+  \item{`"rank_mean"`}{Averages the percentile rank of each node across all centralities, then selects the top `top_percentage` nodes. }
+}
+Ignored when only one centrality method is used (default for multiple methods: `"intersection"`).}
+
+\item{mode}{Character, mode for directed graphs in degree, strength, closeness, harmonic, kcore.
+If `NULL` (default), `"out"` is used for directed, `"all"` for undirected networks.}
 }
 \value{
 A list object: a list of hubs for each sample.
 }
 \description{
-Identifying sample-specific hubs
+Identifying sample-specific hubs with multiple centrality measures
 }
 \examples{
+\donttest{
 data(bulk_ncR_tar_normal_cancer)
-bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
-hubs <- Network_hub(bulk_LIONESS_res)
-
+bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5],
+                            bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
+# Classic degree‑based hubs
+hubs_degree <- Network_hub(bulk_LIONESS_res)
+# Robust hubs (intersection of degree, betweenness, eigenvector)
+hubs_robust <- Network_hub(bulk_LIONESS_res,
+                           centrality_methods = c("degree", "betweenness", "eigenvector"))
+}
 }
 \references{
-Zhang J, Liu L, Xu T, Zhang W, Zhao C, Li S, Li J, Rao N, Le TD. Exploring cell-specific miRNA regulation with single-cell miRNA-mRNA co-sequencing data. BMC Bioinformatics.2021; 22(1):578.
+Barabási A-L, Oltvai ZN. Network biology: understanding the cell’s functional organization. Nature Reviews. Genetics. 2004;5(2):101–113.
+Wang M, Wang H, Zheng H. A mini review of node centrality metrics in biological networks. International Journal of Network Dynamics and Intelligence. 2022;1(1):99–110.
 }

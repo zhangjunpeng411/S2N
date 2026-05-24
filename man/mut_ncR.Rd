@@ -5,16 +5,14 @@
 \alias{mut_ncR}
 \title{Mutation data}
 \format{
-mut_ncR: A character object with 158 SNV genes.
+mut_ncR: A character object with 158 mutation lncRNAs.
 }
 \description{
 Mutation data
 }
 \details{
-The mutation genes are collected from miRNASNP v3.0 (http://bioinfo.life.hust.edu.cn/miRNASNP/#!/) and lncRNASNP v3.0 (http://bioinfo.life.hust.edu.cn/lncRNASNP#!/) databases.
+The mutation lncRNAs are collected from lncRNASNP v3.0 (http://gong_lab.hzau.edu.cn/lncRNASNP3/).
 }
 \references{
-Liu CJ, Fu X, Xia M, Zhang Q, Gu Z, Guo AY. miRNASNP-v3: a comprehensive database for SNPs and disease-related variations in miRNAs and miRNA targets. Nucleic Acids Res. 2021;49(D1):D1276-D1281.
-
 Yang Y, Wang D, Miao YR, Wu X, Luo H, Cao W, Yang W, Yang J, Guo AY, Gong J. lncRNASNP v3: an updated database for functional variants in long non-coding RNAs. Nucleic Acids Res. 2023;51(D1):D192-D198.
 }

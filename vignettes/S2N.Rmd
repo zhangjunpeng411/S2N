@@ -196,7 +196,7 @@ lncTarget_validation <- Network_validation(scRNA_LIONESS_res, lncRTarget_Groundt
 ```
 
 ## Identifying sample-specific hubs
-The function 'Network_hub' is implemented to Identifying sample-specific hubs with the largest 20% degree in default.
+The function 'Network_hub' is implemented to identifying sample-specific hubs with the largest 20% degree in default.
 
 ```{r, eval=TRUE, include=TRUE}
 hubs <- Network_hub(bulk_LIONESS_res)
@@ -213,15 +213,7 @@ Network_module_res <- Network_module(bulk_LIONESS_res)
 The function 'Sim.network' is used to calculate sample-sample similarity matrix between two list of sample-specific networks.
 
 ```{r, eval=TRUE, include=TRUE}
-res <- Sim.network(bulk_LIONESS_res,  bulk_LIONESS_res)
-```
-
-## Performing hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific networks
-The function 'Network_sim_hc' is implemented to perform hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific networks.
-
-```{r, eval=TRUE, include=TRUE}
-res <- Network_sim_hc(bulk_LIONESS_res)
-plot(res)
+network_sim_res <- Sim.network(bulk_LIONESS_res,  bulk_LIONESS_res)
 ```
 
 ## Calculating sample-sample similarity matrix between two lists of sample-specific hubs
@@ -229,15 +221,7 @@ The function 'Sim.hub' is used to calculate sample-sample similarity matrix betw
 
 ```{r, eval=TRUE, include=TRUE}
 hubs <- Network_hub(bulk_LIONESS_res)
-res <- Sim.hub(hubs, hubs)
-```
-
-## Performing hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific hubs
-The function 'Hub_sim_hc' is implemented to perform hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific hubs.
-
-```{r, eval=TRUE, include=TRUE}
-res <- Hub_sim_hc(hubs)
-plot(res)
+hub_sim_res <- Sim.hub(hubs, hubs)
 ```
 
 ## Calculating sample-sample similarity matrix between two lists of sample-specific modules
@@ -245,15 +229,29 @@ The function 'Sim.module' is used to calculate sample-sample similarity matrix b
 
 ```{r, eval=TRUE, include=TRUE}
 Network_module_res <- Network_module(bulk_LIONESS_res)
-res <- Sim.module(Network_module_res[[1]], Network_module_res[[2]])
+n <- length(Network_module_res)
+     module_sim_res <- matrix(NA, n, n)
+     for (i in seq(n)) {
+         for (j in seq(n)) {
+             module_sim_res[i, j] <- Sim.module(Network_module_res[[i]], Network_module_res[[j]])
+         }
+     }
+rownames(module_sim_res) <- colnames(module_sim_res) <- names(Network_module_res)
 ```
 
-## Performing hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific modules
-The function 'Module_sim_hc' is implemented to perform hierarchical clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific modules.
+## Performing clustering analysis of samples using the calculated sample-sample similarity matrix
+The function 'sample_cluster' is implemented to perform clustering analysis of samples using the calculated sample-sample similarity matrix in terms of sample-specific networks, hubs, and modules. Four clustering methods (Hierarchical clustering, Partitioning Around Medoids, Spectral clustering, K-means) can be used.
 
 ```{r, eval=TRUE, include=TRUE}
-res <- Module_sim_hc(Network_module_res)
-plot(res)
+# In terms of sample-specific networks
+network_cluster_res <- sample_cluster(network_sim_res)
+plot(network_cluster_res)
+# In terms of sample-specific hubs
+hub_cluster_res <- sample_cluster(hub_sim_res)
+plot(hub_cluster_res)
+# In terms of sample-specific modules
+module_cluster_res <- sample_cluster(module_sim_res)
+plot(module_cluster_res)
 ```
 
 # Conclusions

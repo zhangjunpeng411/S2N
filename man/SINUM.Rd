@@ -7,9 +7,9 @@
 SINUM(reg_cancer, tar_cancer, boxsize = 0.2, zscore.cutoff = 0, num.cores = 2)
 }
 \arguments{
-\item{reg_cancer}{A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.}
+\item{reg_cancer}{A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.}
 
-\item{tar_cancer}{A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
+\item{tar_cancer}{A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
 
 \item{boxsize}{Size of neighborhood (0.2 in default).}
 

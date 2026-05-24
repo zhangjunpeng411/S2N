@@ -5,16 +5,15 @@
 \alias{scRNA_tar_cancer}
 \title{Single-cell target gene expression data in breast cancer}
 \format{
-scRNA_tar_cancer: A data frame object with 736 barcodes of CID3946 breast cancer cells (columns) and 9469 ncRNAs (rows).
+scRNA_tar_cancer: A data frame object with 736 barcodes of CID3946 breast cancer cells (columns) and 9469 target genes (rows).
 }
 \description{
 Single-cell target gene expression data in breast cancer
 }
 \details{
-The matched miRNA and lncRNA expression data in breast cancer cells is obtained from Wu et al.
-The data is pre-processed by using Seurat R package.
+The target gene expression data in breast cancer cells is obtained from Wu et al.
 The matched lncRNA and mRNA expression data is regarded as single-cell target gene expression data in breast cancer.
 }
 \references{
-Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
+Wu SZ, Al-Eryani G, Roden DL,  et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 }

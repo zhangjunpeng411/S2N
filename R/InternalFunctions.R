@@ -190,7 +190,7 @@ create.multiplex <- function(LayersList, ...) {
 ## (https://github.com/alberto-valdeolivas/RandomWalkRestartMH/) Internal
 ## function
 #' @export
-#' @method compute.adjacency.matrix
+# @method compute.adjacency.matrix
 compute.adjacency.matrix <- function(x, delta = 0.5, ...) {
     if (!isMultiplex(x)) {
         stop("Not a Multiplex object")
@@ -1076,7 +1076,7 @@ getLinkCommunities <- function(network, hcmethod = "average", use.all.edges = FA
 ## Internal function plot.linkcomm from linkcomm package
 ## (https://github.com/alextkalinka/linkcomm).
 #' @export
-#' @method plot.linkcomm
+# @method plot.linkcomm
 plot.linkcomm <- function(x, type = "", ...)
   # S3 method for "plot" generic function.
   # x is a "linkcomm" object.
@@ -1639,7 +1639,9 @@ plotLinkCommSummComm <- function(x, clusterids = 1:x$numbers[3], summary = "conn
 ## Internal function csn_edge from CSmiR methods
 ## (https://github.com/zhangjunpeng411/CSmiR) with GPL-2 license.
 CSN_net_bootstrap <- function(reg_cancer, tar_cancer, boxsize = 0.1, bootstrap_betw_point = 5,
-    bootstrap_num = 100, p.value.cutoff = 0.05) {
+    bootstrap_num = 100, p.value.cutoff = 0.05, seed = 123) {
+
+    if (!is.null(seed)) set.seed(seed)
 
     regs_num <- ncol(reg_cancer)
     tars_num <- ncol(tar_cancer)

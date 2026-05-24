@@ -5,15 +5,14 @@
 \alias{scRNA_tar_normal}
 \title{Single-cell target gene expression data in normal breast}
 \format{
-scRNA_tar_normal: A data frame object with 2430 barcodes of normal breast cells (columns) and 11226 ncRNAs (rows).
+scRNA_tar_normal: A data frame object with 2430 barcodes of normal breast cells (columns) and 11226 target genes (rows).
 }
 \description{
 Single-cell target gene expression data in normal breast
 }
 \details{
-The matched miRNA and lncRNA expression data in normal breast cells is obtained from GEO (GSE15388).
-The data is pre-processed by using Seurat R package.
-The matched lncRNA and mRNA expression data is regarded as single-cell target gene expression data in normal breast.
+The target gene expression data in normal breast cells is obtained from GEO (GSE15388).
+The target gene expression data is regarded as single-cell target gene expression data in normal breast.
 }
 \references{
 Martin Carli JF, Trahan GD, Jones KL, Hirsch N, Rolloff KP, Dunn EZ, Friedman JE, Barbour LA, Hernandez TL, MacLean PS, Monks J, McManaman JL,

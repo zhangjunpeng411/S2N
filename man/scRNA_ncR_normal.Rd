@@ -5,15 +5,14 @@
 \alias{scRNA_ncR_normal}
 \title{Single-cell ncRNA expression data in normal breast}
 \format{
-scRNA_ncR_normal: A data frame object with 2430 barcodes of normal breast cells (columns) and 343 ncRNAs (rows).
+scRNA_ncR_normal: A data frame object with 2430 barcodes of normal breast cells (columns) and 343 lncRNAs (rows).
 }
 \description{
 Single-cell ncRNA expression data in normal breast
 }
 \details{
-The matched miRNA and lncRNA expression data in normal breast cells is obtained from GEO (GSE153889).
-The data is pre-processed by using Seurat R package.
-The matched miRNA and lncRNA expression data is regarded as single-cell ncRNA expression data in normal breast.
+The lncRNA expression data in normal breast cells is obtained from GEO (GSE153889).
+The lncRNA expression data is regarded as single-cell ncRNA expression data in normal breast.
 }
 \references{
 Martin Carli JF, Trahan GD, Jones KL, Hirsch N, Rolloff KP, Dunn EZ, Friedman JE, Barbour LA, Hernandez TL, MacLean PS, Monks J,

@@ -5,11 +5,11 @@
 \alias{bulk_tar_cancer}
 \title{Bulk target gene expression data in breast cancer}
 \format{
-bulk_tar_cancer: A data frame object with six BRCA samples (columns) and 22427 target genes (rows).
+bulk_tar_cancer: A data frame object with 6 BRCA samples (columns) and 22427 target genes (rows).
 }
 \description{
 Bulk target gene expression data in breast cancer
 }
 \details{
-The matched lncRNA and mRNA expression data in breast cancer is obtained from TCGA (http://cancergenome.nih.gov/).
+The target gene expression data in breast cancer is obtained from TCGA (http://cancergenome.nih.gov/).
 }

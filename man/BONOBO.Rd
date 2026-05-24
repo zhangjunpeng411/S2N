@@ -4,14 +4,18 @@
 \alias{BONOBO}
 \title{BONOBO}
 \usage{
-BONOBO(reg_cancer, tar_cancer, p.value.cutoff = 0.05)
+BONOBO(reg_cancer, tar_cancer, p.value.cutoff = 0.05, num.cores = 2)
 }
 \arguments{
-\item{reg_cancer}{A data frame object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.}
+\item{reg_cancer}{A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object,
+the input regulator expression data in tumor samples, columns are samples and rows are regulators.}
 
-\item{tar_cancer}{A data frame object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
+\item{tar_cancer}{A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object,
+the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
 
 \item{p.value.cutoff}{pvalue cutoff for identifying sample-specific regulatory network.}
+
+\item{num.cores}{Integer, number of cores to use for parallel processing. Default is 2.}
 }
 \value{
 An igraph object: a list of regulator-target interactions for each sample.

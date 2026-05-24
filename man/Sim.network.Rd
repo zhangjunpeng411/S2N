@@ -25,3 +25,8 @@ bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 
 res <- Sim.network(bulk_LIONESS_res,  bulk_LIONESS_res)
 
 }
+\references{
+Simpson EH. Measurement of diversity. Nature. 1949;163(4148):688–688.
+Jaccard P. The distribution of the flora in the alpine zone. The New Phytologist. 1912;11(2):37–50.
+Lin D. An information-theoretic definition of similarity. In: Proceedings of the Fifteenth International Conference on Machine Learning. San Francisco, CA, USA: Morgan Kaufmann Publishers Inc.; 1998. p. 296–304. (ICML ’98).
+}

@@ -24,9 +24,11 @@ Imports: igraph,
     methods,
     stats,
     utils,
+    cluster,
     entropy,
     infotheo,
     SummarizedExperiment
 Suggests: BiocStyle, knitr, rmarkdown, testthat
 VignetteBuilder: knitr
-RoxygenNote: 7.3.2
+Config/roxygen2/version: 8.0.0
+RoxygenNote: 8.0.0

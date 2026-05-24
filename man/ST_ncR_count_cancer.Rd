@@ -12,9 +12,8 @@ Spatial transcriptomics count data of lncRNA in breast cancer
 }
 \details{
 The spatial transcriptomics count data of lncRNAs in breast cancer is obtained from Wu et al.
-The spatial transcriptomics data is pre-processed by using Seurat R package.
 The lncRNA count data is regarded as spatial transcriptomics count data of lncRNA in breast cancer.
 }
 \references{
-Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
+Wu SZ, Al-Eryani G, Roden DL, et al.  A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 }

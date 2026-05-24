@@ -5,7 +5,7 @@
 \alias{bulk_ncR_cancer}
 \title{Bulk ncRNA expression data in breast cancer}
 \format{
-bulk_ncR_cancer: A data frame object with six BRCA samples (columns) and 4794 ncRNAs (rows).
+bulk_ncR_cancer: A data frame object with 6 BRCA samples (columns) and 4794 ncRNAs (rows).
 }
 \description{
 Bulk ncRNA expression data in breast cancer

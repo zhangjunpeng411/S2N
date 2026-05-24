@@ -4,7 +4,7 @@
 \alias{Network_module}
 \title{Network_module}
 \usage{
-Network_module(network_graph, method = "MCL", directed = FALSE, modulesize = 3)
+Network_module(network_graph, method = "MCL", directed = TRUE, modulesize = 3)
 }
 \arguments{
 \item{network_graph}{An igraph object, a list of sample-specific networks.}
@@ -26,4 +26,7 @@ data(bulk_ncR_tar_normal_cancer)
 bulk_LIONESS_res <- LIONESS(bulk_ncR_cancer[1:100, 1:5], bulk_tar_cancer[1:500, 1:5], cormethod = 'pearson')
 Network_module_res <- Network_module(bulk_LIONESS_res)
 
+}
+\references{
+Csárdi G, Nepusz T (2006). “The igraph software package for complex network research.” InterJournal, Complex Systems, 1695.
 }

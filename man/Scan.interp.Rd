@@ -13,9 +13,9 @@ Scan.interp(
 )
 }
 \arguments{
-\item{reg_cancer}{A data frame object, regulator expression data with columns are samples and rows are regulators.}
+\item{reg_cancer}{A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input regulator expression data in tumor samples, columns are samples and rows are regulators.}
 
-\item{tar_cancer}{A data frame object, target expression data with columns are samples and rows are targets.}
+\item{tar_cancer}{A dataframe or matrix or SummarizedExperiment or SingleCellExperiment or SpatialExperiment object, the input target gene expression data in tumor samples, columns are samples and rows are target genes.}
 
 \item{method}{Methods for calculating correlations, one of 'pearson', 'spearman', 'kendall'.}
 

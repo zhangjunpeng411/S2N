@@ -11,10 +11,9 @@ scRNA_ncR_count_cancer: A data frame object with 736 barcodes of CID3946 breast 
 Single-cell ncRNA count data in breast cancer
 }
 \details{
-The matched miRNA and lncRNA count data is obtained from Wu et al.
-The count data is pre-processed by using Seurat R package.
-The matched miRNA and lncRNA expression data is regarded as single-cell ncRNA count data in breast cancer.
+The lncRNA count data is obtained from Wu et al.
+The lncRNA expression data is regarded as single-cell ncRNA count data in breast cancer.
 }
 \references{
-Wu SZ, Roden DL, Junankar S et al. A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
+Wu SZ, Al-Eryani G, Roden DL, et al.  A single-cell and spatially resolved atlas of human breast cancers. Nat Genet, 2021;53(9):1334-1347.
 }
