@@ -1,0 +1,491 @@
+---
+title: "Tutorial for inferring sample-specific lncRNA regulatory networks with S2N in the TCGA-BRCA dataset" 
+author: "\\
+    
+    Junpeng Zhang (zjp@dali.edu.cn)\\
+    
+    School of Engineering, Dali University"
+date: '`r Sys.Date()`'
+output:
+    BiocStyle::html_document:
+      toc: yes
+    BiocStyle::pdf_document:
+      toc: yes
+vignette: >
+    %\VignetteIndexEntry{Tutorial for inferring sample-specific lncRNA regulatory networks with S2N in the TCGA-BRCA dataset} 
+    %\VignetteEngine{knitr::rmarkdown} 
+    %\usepackage[utf8]{inputenc} 
+    %\VignetteEncoding{UTF-8}
+---
+
+```{r style, echo=FALSE, results="asis", message=FALSE}
+BiocStyle::markdown()
+knitr::opts_chunk$set(tidy = FALSE,
+    warning = FALSE,
+    message = FALSE)
+```
+
+# Introduction
+In this tutorial, we apply 10 built-in methods (SSN, Paired-SSN, LIONESS, SCS, CSN, Scan.perturb, Scan.interp, SWEET, SINUM, and BONOBO) of S2N to identify tissue-specific lncRNA regulatory networks from the TCGA-BRCA dataset (https://gdc-hub.s3.us-east-1.amazonaws.com/download/TCGA-BRCA.star_fpkm-uq.tsv.gz). 
+
+# Installation of S2N
+S2N is freely available open-source under GNU GPL-3.0 from: https://github.com/zhangjunpeng411/S2N/, should be installed from GitHub prior to use.
+
+```{r, eval=TRUE, include=TRUE}
+install.packages("remotes")
+library(remotes)
+remotes::install_github("zhangjunpeng411/S2N")
+library(S2N)
+```
+
+# Data preparation
+The bulk gene expression data (TCGA-BRCA.star_fpkm-uq.tsv) are downloaded from UCSC Xena (http://xena.ucsc.edu/), and the processed data (log2(fpkm-uq+1)) and ID/Gene mapping information (gencode.v36.annotation.gtf.gene.probemap) are from https://gdc-hub.s3.us-east-1.amazonaws.com/download/TCGA-BRCA.star_fpkm-uq.tsv.gz, and https://gdc-hub.s3.us-east-1.amazonaws.com/download/gencode.v36.annotation.gtf.gene.probemap, respectively. Please paste all downloaded files into a single folder (set the folder as the directory of R environment).
+
+```{r, eval=TRUE, include=TRUE}
+gene_data <- read.delim("TCGA-BRCA.star_fpkm-uq.tsv", row.names = 1, stringsAsFactors = FALSE)
+colnames(gene_data) <- gsub("\\.", "-", colnames(gene_data))
+gene_probe_map <- read.delim("gencode.v36.annotation.gtf.gene.probemap", stringsAsFactors = FALSE)
+```
+
+We compute the average expression values of duplicate genes in the TCGA-BRCA dataset.
+
+```{r, eval=TRUE, include=TRUE}
+idx <- match(rownames(gene_data), gene_probe_map$id)
+gene_names <- ifelse(is.na(idx), rownames(gene_data), gene_probe_map$gene[idx])
+M <- as.matrix(gene_data)
+group <- factor(gene_names, levels = unique(gene_names))
+agg <- rowsum(M, group, reorder = FALSE)
+sizes <- table(group)[rownames(agg)]
+gene_data <- agg / as.vector(sizes)
+```
+
+The TCGA-BRCA dataset is further divided into two datssets (expression data of lncRNAs and mRNAs) according to the annotation information (hgnc_complete_set.txt) of HGNC (https://www.genenames.org/download/statistics-and-files/).
+
+```{r, eval=TRUE, include=TRUE}
+hgnc_complete_set <- read.delim("hgnc_complete_set.txt", stringsAsFactors=FALSE)
+lncRNA_genes <- hgnc_complete_set$symbol[hgnc_complete_set$locus_type == "RNA, long non-coding"]
+mRNA_genes <- hgnc_complete_set$symbol[hgnc_complete_set$locus_group == "protein-coding gene"]
+lncRNA_data <- gene_data[rownames(gene_data) %in% lncRNA_genes, , drop = FALSE]
+mRNA_data   <- gene_data[rownames(gene_data) %in% mRNA_genes, , drop = FALSE]
+```
+
+We only select matched tumor¨Cnormal pairs per patient.
+
+```{r, eval=TRUE, include=TRUE}
+barcodes <- colnames(lncRNA_data)
+patient <- substr(barcodes, 1, 12)
+code    <- as.integer(substr(barcodes, 14, 15))
+
+is_tumor  <- code >= 1 & code <= 9
+is_normal <- code >= 10 & code <= 19
+
+paired_patients <- intersect(unique(patient[is_tumor]), unique(patient[is_normal]))
+tumor_selected <- sapply(paired_patients, function(p) barcodes[patient == p & is_tumor][1])
+normal_selected <- sapply(paired_patients, function(p) barcodes[patient == p & is_normal][1])
+tumor_selected <- tumor_selected[order(paired_patients)]
+normal_selected <- normal_selected[order(paired_patients)]
+selected_cols <- c(tumor_selected, normal_selected)
+
+lncRNA_data_map <- lncRNA_data[, selected_cols, drop = FALSE]
+mRNA_data_map   <- mRNA_data[, selected_cols, drop = FALSE]
+```
+
+The TCGA-BRCA dataset is further preprocessed by removing duplicate and invariant genes, retaining only highly expressed and variable lncRNAs and mRNAs.
+
+```{r, eval=TRUE, include=TRUE}
+## Remove genes with zero expression values in all cells
+lncRNA_RNA_norm_mean <- unlist(lapply(seq(dim(lncRNA_data_map)[1]), function(i) mean(lncRNA_data_map[i, ])))
+lncRNA_RNA_norm_zero <- lncRNA_data_map[which(lncRNA_RNA_norm_mean > 0), ]
+mRNA_RNA_norm_mean <- unlist(lapply(seq(dim(mRNA_data_map)[1]), function(i) mean(mRNA_data_map[i, ])))
+mRNA_RNA_norm_zero <- mRNA_data_map[which(mRNA_RNA_norm_mean > 0), ]
+
+## Reserve genes with higher mean expression values (top 10%) in all cells
+lncRNA_mean <- rowMeans(lncRNA_RNA_norm_zero)
+cutoff_lncRNA <- quantile(lncRNA_mean, probs = 0.9)
+lncR_bulkRNA <- lncRNA_RNA_norm_zero[lncRNA_mean >= cutoff_lncRNA, ]
+mRNA_mean <- rowMeans(mRNA_RNA_norm_zero)
+cutoff_mRNA <- quantile(mRNA_mean, probs = 0.9)
+mR_bulkRNA <- mRNA_RNA_norm_zero[mRNA_mean >= cutoff_mRNA, ]
+lncR_bulkRNA_tumor <- lncR_bulkRNA[, 1:(ncol(lncR_bulkRNA)/2)]
+lncR_bulkRNA_normal <- lncR_bulkRNA[, (ncol(lncR_bulkRNA)/2+1):ncol(lncR_bulkRNA)]
+mR_bulkRNA_tumor <- mR_bulkRNA[, 1:(ncol(mR_bulkRNA)/2)]
+mR_bulkRNA_normal <- mR_bulkRNA[, (ncol(mR_bulkRNA)/2+1):ncol(mR_bulkRNA)]
+```
+
+# Sample-specific lncRNA regulatory network construction
+We use default parameters of 10 built-in methods (SSN, Paired-SSN, LIONESS, SCS, CSN, Scan.perturb, Scan.interp, SWEET, SINUM, and BONOBO) to infer tissue-specific lncRNA regulatory networks. In this context, each tissue represents a sample.
+
+```{r, eval=TRUE, include=TRUE}
+install.packages("peakRAM")
+library(peakRAM)
+
+dir.create("TCGA_BRCA_results", showWarnings = FALSE, recursive = TRUE)
+
+exprs <- list(
+  SSN = quote({
+    res_SSN <- SSN(lncR_bulkRNA_normal, mR_bulkRNA_normal, lncR_bulkRNA_tumor, mR_bulkRNA_tumor, num.cores = 16)
+    saveRDS(res_SSN, "TCGA_BRCA_results/bulkRNA_SSN_res.rds")
+  }),
+  PairedSSN = quote({
+    res_PairedSSN <- PairedSSN(lncR_bulkRNA_normal, mR_bulkRNA_normal, lncR_bulkRNA_tumor, mR_bulkRNA_tumor, num.cores = 16)
+    saveRDS(res_PairedSSN, "TCGA_BRCA_results/bulkRNA_PairedSSN_res.rds")
+  }),
+  LIONESS = quote({
+    res_LIONESS <- LIONESS(lncR_bulkRNA_tumor, mR_bulkRNA_tumor, num.cores = 16)
+    saveRDS(res_LIONESS, "TCGA_BRCA_results/bulkRNA_LIONESS_res.rds")
+  }),
+  SCS = quote({
+    res_SCS <- SCS(rownames(lncR_bulkRNA_tumor), lncR_bulkRNA_tumor, mR_bulkRNA_tumor, num.cores = 16)
+    saveRDS(res_SCS, "TCGA_BRCA_results/bulkRNA_SCS_res.rds")
+  }),
+  CSN = quote({
+    res_CSN <- CSN(lncR_bulkRNA_tumor, mR_bulkRNA_tumor, num.cores = 16)
+    saveRDS(res_CSN, "TCGA_BRCA_results/bulkRNA_CSN_res.rds")
+  }),
+  Scan.perturb = quote({
+    res_Scan.perturb <- Scan.perturb(lncR_bulkRNA_tumor, mR_bulkRNA_tumor, method = 'pearson', num.cores = 16)
+    saveRDS(res_Scan.perturb, "TCGA_BRCA_results/bulkRNA_Scan.perturb_res.rds")
+  }),
+  Scan.interp = quote({
+    res_Scan.interp <- Scan.interp(lncR_bulkRNA_tumor, mR_bulkRNA_tumor, method = 'pearson', num.cores = 16)
+    saveRDS(res_Scan.interp, "TCGA_BRCA_results/bulkRNA_Scan.interp_res.rds")
+  }),
+  SWEET = quote({
+    res_SWEET <- SWEET(lncR_bulkRNA_tumor, mR_bulkRNA_tumor, num.cores = 16)
+    saveRDS(res_SWEET, "TCGA_BRCA_results/bulkRNA_SWEET_res.rds")
+  }),
+  SINUM = quote({
+    res_SINUM <- SINUM(lncR_bulkRNA_tumor, mR_bulkRNA_tumor, num.cores = 16)
+    saveRDS(res_SINUM, "TCGA_BRCA_results/bulkRNA_SINUM_res.rds")
+  }),
+  BONOBO = quote({
+    res_BONOBO <- BONOBO(lncR_bulkRNA_tumor, mR_bulkRNA_tumor, num.cores = 16)
+    saveRDS(res_BONOBO, "TCGA_BRCA_results/bulkRNA_BONOBO_res.rds")
+  })
+)
+
+peak_results <- do.call(peakRAM, exprs)
+saveRDS(peak_results, "TCGA_BRCA_results/peakRAM_full_metrics_bulkRNA.rds")
+```
+
+# Sample-specific lncRNA regulatory network validation
+To validate the predicted sample-specific lncRNA regulatory networks, we use established ground truth from miRTarBase v10.0 and TarBase v9.0.
+
+```{r, eval=TRUE, include=TRUE}
+data(lncRTarget_Groundtruth)
+bulkRNA_SSN_validation <- Network_validation(res_SSN, lncRTarget_Groundtruth, calculate_metrics = TRUE)
+bulkRNA_PairedSSN_validation <- Network_validation(res_PairedSSN, lncRTarget_Groundtruth, calculate_metrics = TRUE)
+bulkRNA_LIONESS_validation <- Network_validation(res_LIONESS, lncRTarget_Groundtruth, calculate_metrics = TRUE)
+bulkRNA_CSN_validation <- Network_validation(res_CSN, lncRTarget_Groundtruth, calculate_metrics = TRUE)
+bulkRNA_Scan.perturb_validation <- Network_validation(res_Scan.perturb, lncRTarget_Groundtruth, calculate_metrics = TRUE)
+bulkRNA_Scan.interp_validation <- Network_validation(res_Scan.interp, lncRTarget_Groundtruth, calculate_metrics = TRUE)
+bulkRNA_SWEET_validation <- Network_validation(res_SWEET, lncRTarget_Groundtruth, calculate_metrics = TRUE)
+bulkRNA_SINUM_validation <- Network_validation(res_SINUM, lncRTarget_Groundtruth, calculate_metrics = TRUE)
+
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Extract performance values from each validation list
+df_list <- list(
+  SSN          = bulkRNA_SSN_validation[[2]][,4]*100,
+  PairedSSN    = bulkRNA_PairedSSN_validation[[2]][,4]*100,
+  LIONESS      = bulkRNA_LIONESS_validation[[2]][,4]*100,
+  CSN          = bulkRNA_CSN_validation[[2]][,4]*100,
+  Scan.perturb = bulkRNA_Scan.perturb_validation[[2]][,4]*100,
+  Scan.interp  = bulkRNA_Scan.interp_validation[[2]][,4]*100,
+  SWEET        = bulkRNA_SWEET_validation[[2]][,4]*100,
+  SINUM        = bulkRNA_SINUM_validation[[2]][,4]*100
+)
+
+# Convert to long-format data frame (Method, Value)
+df_long <- bind_rows(lapply(names(df_list), function(method) {
+  data.frame(Method = method, Value = df_list[[method]])
+}))
+
+# Set Method as factor with the desired order
+df_long$Method <- factor(df_long$Method, levels = names(df_list))
+
+# Nature-inspired color palette 
+science_colors <- c("#0072B5", "#E18727", "#20854E", "#BC3C29", 
+                    "#7876B1", "#6A3D9A", "#FF7F00", "#FDBF6F")
+
+# Generate boxplot with jittered points
+p <- ggplot(df_long, aes(x = Method, y = Value, fill = Method)) +
+  geom_boxplot(width = 0.6, alpha = 0.7, outlier.size = 0.5, 
+               color = "black", outlier.alpha = 0.3) +
+  geom_jitter(width = 0.15, size = 0.5, alpha = 0.3, color = "black") +
+  scale_fill_manual(values = science_colors[1:length(unique(df_long$Method))]) +
+  labs(x = "", y = "Percentage of validated lncRNA targets (%)") +
+  theme_classic() +
+  theme(text = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+        axis.text.y = element_text(size = 8),
+        axis.line = element_line(linewidth = 0.5, color = "black"),
+        panel.grid = element_blank(),
+        legend.position = "none")
+
+# Display and save
+print(p)
+ggsave("performance_boxplot.png", p, width = 10, height = 9, dpi = 300, units = "cm")
+```
+
+# Sample similarity analysis
+We calculate pairwise sample similarity based on three key features derived from each sample-specific network: (i) network architecture, (ii) hub gene composition, and (iii) modular organization. Histograms with kernel density overlay were generated from the BRCA tissue similarity matrices derived from sample-specific networks, hubs, and modules produced by the SWEET method.
+
+```{r, eval=TRUE, include=TRUE}
+# network-level
+bulkRNA_SSN_net_sim <- Sim.network(res_SSN,  res_SSN)
+bulkRNA_PairedSSN_net_sim <- Sim.network(res_PairedSSN,  res_PairedSSN)
+bulkRNA_LIONESS_net_sim <- Sim.network(res_LIONESS,  res_LIONESS)
+bulkRNA_CSN_net_sim <- Sim.network(res_CSN, res_CSN)
+bulkRNA_Scan.perturb_net_sim <- Sim.network(res_Scan.perturb, res_Scan.perturb)
+bulkRNA_Scan.interp_net_sim <- Sim.network(res_Scan.interp, res_Scan.interp)
+bulkRNA_SWEET_net_sim <- Sim.network(res_SWEET, res_SWEET)
+bulkRNA_SINUM_net_sim <- Sim.network(res_SINUM, res_SINUM)
+
+# hub-level
+bulkRNA_SSN_hub <- Network_hub(res_SSN)
+bulkRNA_PairedSSN_hub <- Network_hub(res_PairedSSN)
+bulkRNA_LIONESS_hub <- Network_hub(res_LIONESS)
+bulkRNA_CSN_hub <- Network_hub(res_CSN)
+bulkRNA_Scan.perturb_hub <- Network_hub(res_Scan.perturb)
+bulkRNA_Scan.interp_hub <- Network_hub(res_Scan.interp)
+bulkRNA_SWEET_hub <- Network_hub(res_SWEET)
+bulkRNA_SINUM_hub <- Network_hub(res_SINUM)
+
+bulkRNA_SSN_hub_sim <- Sim.hub(bulkRNA_SSN_hub,  bulkRNA_SSN_hub)
+bulkRNA_PairedSSN_hub_sim <- Sim.hub(bulkRNA_PairedSSN_hub,  bulkRNA_PairedSSN_hub)
+bulkRNA_LIONESS_hub_sim <- Sim.hub(bulkRNA_LIONESS_hub,  bulkRNA_LIONESS_hub)
+bulkRNA_CSN_hub_sim <- Sim.hub(bulkRNA_CSN_hub, bulkRNA_CSN_hub)
+bulkRNA_Scan.perturb_hub_sim <- Sim.hub(bulkRNA_Scan.perturb_hub, bulkRNA_Scan.perturb_hub)
+bulkRNA_Scan.interp_hub_sim <- Sim.hub(bulkRNA_Scan.interp_hub, bulkRNA_Scan.interp_hub)
+bulkRNA_SWEET_hub_sim <- Sim.hub(bulkRNA_SWEET_hub, bulkRNA_SWEET_hub)
+bulkRNA_SINUM_hub_sim <- Sim.hub(bulkRNA_SINUM_hub, bulkRNA_SINUM_hub)
+
+# module-level
+bulkRNA_SSN_module <- Network_module(res_SSN)
+bulkRNA_PairedSSN_module <- Network_module(res_PairedSSN)
+bulkRNA_LIONESS_module <- Network_module(res_LIONESS)
+bulkRNA_CSN_module <- Network_module(res_CSN)
+bulkRNA_Scan.perturb_module <- Network_module(res_Scan.perturb)
+bulkRNA_Scan.interp_module <- Network_module(res_Scan.interp)
+bulkRNA_SWEET_module <- Network_module(res_SWEET)
+bulkRNA_SINUM_module <- Network_module(res_SINUM)
+
+n_SSN <- length(bulkRNA_SSN_module)
+bulkRNA_SSN_module_sim <- matrix(NA, n_SSN, n_SSN)
+for (i in seq(n_SSN)) {
+  for (j in seq(n_SSN)) {
+    bulkRNA_SSN_module_sim[i, j] <- Sim.module(bulkRNA_SSN_module[[i]], bulkRNA_SSN_module[[j]])
+  }
+}
+
+rownames(bulkRNA_SSN_module_sim) <- rownames(bulkRNA_SSN_net_sim)  
+colnames(bulkRNA_SSN_module_sim) <- colnames(bulkRNA_SSN_net_sim) 
+
+n_PairedSSN <- length(bulkRNA_PairedSSN_module)
+bulkRNA_PairedSSN_module_sim <- matrix(NA, n_PairedSSN, n_PairedSSN)
+for (i in seq(n_PairedSSN)) {
+  for (j in seq(n_PairedSSN)) {
+    bulkRNA_PairedSSN_module_sim[i, j] <- Sim.module(bulkRNA_PairedSSN_module[[i]], bulkRNA_PairedSSN_module[[j]])
+  }
+}
+
+rownames(bulkRNA_PairedSSN_module_sim) <- rownames(bulkRNA_PairedSSN_net_sim)  
+colnames(bulkRNA_PairedSSN_module_sim) <- colnames(bulkRNA_PairedSSN_net_sim) 
+
+n_LIONESS <- length(bulkRNA_LIONESS_module)
+bulkRNA_LIONESS_module_sim <- matrix(NA, n_LIONESS, n_LIONESS)
+for (i in seq(n_LIONESS)) {
+  for (j in seq(n_LIONESS)) {
+    bulkRNA_LIONESS_module_sim[i, j] <- Sim.module(bulkRNA_LIONESS_module[[i]], bulkRNA_LIONESS_module[[j]])
+  }
+}
+
+rownames(bulkRNA_LIONESS_module_sim) <- rownames(bulkRNA_LIONESS_net_sim)  
+colnames(bulkRNA_LIONESS_module_sim) <- colnames(bulkRNA_LIONESS_net_sim) 
+
+n_CSN <- length(bulkRNA_CSN_module)
+bulkRNA_CSN_module_sim <- matrix(NA, n_CSN, n_CSN)
+for (i in seq(n_CSN)) {
+  for (j in seq(n_CSN)) {
+    bulkRNA_CSN_module_sim[i, j] <- Sim.module(bulkRNA_CSN_module[[i]], bulkRNA_CSN_module[[j]])
+  }
+}
+
+rownames(bulkRNA_CSN_module_sim) <- rownames(bulkRNA_CSN_net_sim)  
+colnames(bulkRNA_CSN_module_sim) <- colnames(bulkRNA_CSN_net_sim) 
+
+n_Scan.perturb <- length(bulkRNA_Scan.perturb_module)
+bulkRNA_Scan.perturb_module_sim <- matrix(NA, n_Scan.perturb, n_Scan.perturb)
+for (i in seq(n_Scan.perturb)) {
+  for (j in seq(n_Scan.perturb)) {
+    bulkRNA_Scan.perturb_module_sim[i, j] <- Sim.module(bulkRNA_Scan.perturb_module[[i]], bulkRNA_Scan.perturb_module[[j]])
+  }
+}
+
+rownames(bulkRNA_Scan.perturb_module_sim) <- rownames(bulkRNA_Scan.perturb_net_sim)  
+colnames(bulkRNA_Scan.perturb_module_sim) <- colnames(bulkRNA_Scan.perturb_net_sim) 
+
+n_Scan.interp <- length(bulkRNA_Scan.interp_module)
+bulkRNA_Scan.interp_module_sim <- matrix(NA, n_Scan.interp, n_Scan.interp)
+for (i in seq(n_Scan.interp)) {
+  for (j in seq(n_Scan.interp)) {
+    bulkRNA_Scan.interp_module_sim[i, j] <- Sim.module(bulkRNA_Scan.interp_module[[i]], bulkRNA_Scan.interp_module[[j]])
+  }
+}
+
+rownames(bulkRNA_Scan.interp_module_sim) <- rownames(bulkRNA_Scan.interp_net_sim)  
+colnames(bulkRNA_Scan.interp_module_sim) <- colnames(bulkRNA_Scan.interp_net_sim) 
+
+n_SWEET <- length(bulkRNA_SWEET_module)
+bulkRNA_SWEET_module_sim <- matrix(NA, n_SWEET, n_SWEET)
+for (i in seq(n_SWEET)) {
+  for (j in seq(n_SWEET)) {
+    bulkRNA_SWEET_module_sim[i, j] <- Sim.module(bulkRNA_SWEET_module[[i]], bulkRNA_SWEET_module[[j]])
+  }
+}
+
+rownames(bulkRNA_SWEET_module_sim) <- rownames(bulkRNA_SWEET_net_sim)  
+colnames(bulkRNA_SWEET_module_sim) <- colnames(bulkRNA_SWEET_net_sim) 
+
+n_SINUM <- length(bulkRNA_SINUM_module)
+bulkRNA_SINUM_module_sim <- matrix(NA, n_SINUM, n_SINUM)
+for (i in seq(n_SINUM)) {
+  for (j in seq(n_SINUM)) {
+    bulkRNA_SINUM_module_sim[i, j] <- Sim.module(bulkRNA_SINUM_module[[i]], bulkRNA_SINUM_module[[j]])
+  }
+}
+
+rownames(bulkRNA_SINUM_module_sim) <- rownames(bulkRNA_SINUM_net_sim)  
+colnames(bulkRNA_SINUM_module_sim) <- colnames(bulkRNA_SINUM_net_sim) 
+
+## Distribution of network, hub, and module similarity
+install.packages("ggplot2")
+library(ggplot2)
+
+sim_list <- list(
+  net   = bulkRNA_SWEET_net_sim,
+  hub   = bulkRNA_SWEET_hub_sim,
+  module = bulkRNA_SWEET_module_sim
+)
+
+for (name in names(sim_list)) {
+  vals <- sim_list[[name]][upper.tri(sim_list[[name]])]
+  
+  p <- ggplot(data.frame(similarity = vals), aes(x = similarity)) +
+    geom_histogram(aes(y = after_stat(density)), bins = 20,
+                   fill = "#0072B5", color = "white", alpha = 0.7) +
+    geom_density(color = "#BC3C29", linewidth = 0.3) +
+    labs(x = "Similarity", y = "Density") +
+    theme_classic() +
+    theme(text = element_text(size = 12), axis.title = element_text(size = 12),
+          axis.text = element_text(size = 10), axis.line = element_line(linewidth = 0.5),
+          panel.grid = element_blank())
+  
+  ggsave(paste0("similarity_distribution_", name, ".png"), p,
+         width = 8, height = 6, dpi = 300, units = "cm")
+}
+```
+
+# Clustering analysis
+Clustering analysis was performed on the 113 BRCA tissues using an overall similarity matrix derived from the SWEET method, which was calculated as the geometric mean of the network, hub, and module similarity matrices.
+
+```{r, eval=TRUE, include=TRUE}
+install.packages(c("umap", "ggplot2", "dplyr", "cluster"))
+library(umap)
+library(ggplot2)
+library(dplyr)
+library(cluster)
+
+# Combined similarity matrix (geometric mean of three similarity matrices)
+overall_sim <- exp((log(bulkRNA_SWEET_net_sim) + log(bulkRNA_SWEET_hub_sim) + log(bulkRNA_SWEET_module_sim))/3)
+
+# Convert similarity to distance matrix
+dist_mat <- as.matrix(1 - overall_sim)
+hc <- hclust(as.dist(dist_mat), method = "complete")
+
+# Find optimal k (2-10) with all clusters >= 2
+k_min <- 2
+k_max <- min(10, nrow(dist_mat) - 1)
+valid_ks <- c()
+sil_vals <- c()
+h_diffs <- c()
+
+for (k in k_min:k_max) {
+  cl <- cutree(hc, k = k)
+  if (min(table(cl)) >= 2) {
+    valid_ks <- c(valid_ks, k)
+    sil_vals <- c(sil_vals, mean(silhouette(cl, as.dist(dist_mat))[, 3]))
+    if (k < k_max) h_diffs <- c(h_diffs, diff(hc$height)[length(hc$height) - k])
+    else h_diffs <- c(h_diffs, NA)
+  }
+}
+
+if (length(valid_ks) == 0) {
+  best_k <- 2
+  warning("No k with all clusters >=2; forcing k=2")
+} else {
+  best_k_sil <- valid_ks[which.max(sil_vals)]
+  best_k_elbow <- valid_ks[which.max(h_diffs[!is.na(h_diffs)])]
+  best_k <- if (abs(best_k_sil - best_k_elbow) > 2) min(best_k_sil, best_k_elbow) else best_k_sil
+}
+
+# Cut tree at optimal k
+clusters <- cutree(hc, k = best_k)
+
+# Merge singletons (if any) to ensure all clusters >= 2
+tab <- table(clusters)
+if (min(tab) < 2) {
+  for (s in as.numeric(names(tab[tab == 1]))) {
+    idx <- which(clusters == s)
+    d <- dist_mat[idx, ]
+    d[idx] <- Inf
+    clusters[idx] <- clusters[which.min(d)]
+  }
+  clusters <- as.numeric(factor(clusters))
+}
+cat("Final cluster sizes:\n"); print(table(clusters))
+
+# UMAP dimensionality reduction
+set.seed(123)
+umap_out <- umap(d = dist_mat, input = "dist", n_neighbors = 30, min_dist = 0.3, n_components = 2)
+df <- data.frame(
+  UMAP1 = umap_out$layout[, 1],
+  UMAP2 = umap_out$layout[, 2],
+  Cluster = factor(clusters)
+)
+
+# Convex hulls and cluster centers
+hulls <- df %>% group_by(Cluster) %>% filter(n() >= 3) %>% slice(chull(UMAP1, UMAP2))
+centers <- df %>% group_by(Cluster) %>% summarise(UMAP1 = median(UMAP1), UMAP2 = median(UMAP2))
+
+# Colors (up to 10 clusters)
+cols <- c("#0072B5", "#E18727", "#20854E", "#BC3C29", "#7876B1",
+          "#6A3D9A", "#FF7F00", "#FDBF6F", "#B15928", "#A6CEE3")[1:length(unique(clusters))]
+
+p <- ggplot(df, aes(x = UMAP1, y = UMAP2, color = Cluster, fill = Cluster)) +
+  geom_point(size = 1.0, alpha = 0.6) +
+  geom_polygon(data = hulls, aes(fill = Cluster, color = Cluster),
+               alpha = 0.15, linewidth = 0.3, show.legend = FALSE) +
+  geom_text(data = centers, aes(label = Cluster), color = "black", size = 4, fontface = "bold") +
+  scale_color_manual(values = cols) + scale_fill_manual(values = cols) +
+  theme_classic() +
+  labs(x = "UMAP 1", y = "UMAP 2") +
+  theme(text = element_text(size = 10), axis.title = element_text(size = 10),
+        axis.text = element_text(size = 8), axis.line = element_line(linewidth = 0.5),
+        panel.grid = element_blank(), aspect.ratio = 1, legend.position = "right")
+
+ggsave("umap_clustering.png", p, width = 10, height = 8, dpi = 300, units = "cm")
+```
+
+# Conclusions
+In this tutorial, we apply S2N to show how to infer and validate sample-specific lncRNA regulatory networks in the TCGA-BRCA dataset. Moreover, we also perform sample similarity analysis based on three key features derived from each sample-specific network, including network architecture, hub gene composition, and modular organization. Taken together, S2N provides a useful platform for advancing personalized biomedical research, from uncovering driver alterations in individual patients to stratifying cohorts based on sample-specific networks.
+
+# Session information
+```{r}
+sessionInfo()
+```

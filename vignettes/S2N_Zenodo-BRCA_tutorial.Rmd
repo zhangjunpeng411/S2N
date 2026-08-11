@@ -1,0 +1,426 @@
+---
+title: "Tutorial for inferring sample-specific TF regulatory networks with S2N in the Zenodo-BRCA dataset" 
+author: "\\
+    
+    Junpeng Zhang (zjp@dali.edu.cn)\\
+    
+    School of Engineering, Dali University"
+date: '`r Sys.Date()`'
+output:
+    BiocStyle::html_document:
+      toc: yes
+    BiocStyle::pdf_document:
+      toc: yes
+vignette: >
+    %\VignetteIndexEntry{Tutorial for inferring sample-specific TF regulatory networks with S2N in the Zenodo-BRCA dataset} 
+    %\VignetteEngine{knitr::rmarkdown} 
+    %\usepackage[utf8]{inputenc} 
+    %\VignetteEncoding{UTF-8}
+---
+
+```{r style, echo=FALSE, results="asis", message=FALSE}
+BiocStyle::markdown()
+knitr::opts_chunk$set(tidy = FALSE,
+    warning = FALSE,
+    message = FALSE)
+```
+
+# Introduction
+In this tutorial, we apply eight built-in methods (LIONESS, SCS, CSN, Scan.perturb, Scan.interp, SWEET, SINUM, and BONOBO) of S2N to identify spot-specific TF regulatory networks. We use the built-in spatial transcriptomics data with 1057 barcodes of CID44971 breast cancer spots and 14804 mRNAs. The built-in data is from the Zenodo-BRCA dataset (https://zenodo.org/records/4739739). It is noted that SSN and Paired-SSN are unsuitable for the Zenodo-BRCA dataset due to the absence of gene expression data in normal.
+
+# Installation of S2N
+S2N is freely available open-source under GNU GPL-3.0 from: https://github.com/zhangjunpeng411/S2N/, should be installed from GitHub prior to use.
+
+```{r, eval=TRUE, include=TRUE}
+install.packages("remotes")
+library(remotes)
+remotes::install_github("zhangjunpeng411/S2N")
+library(S2N)
+```
+
+# Data preparation
+The built-in spatial transcriptomics data of mRNA in breast cancer includes 1057 barcodes of CID44971 breast cancer spots and 14801 mRNAs.
+
+```{r, eval=TRUE, include=TRUE}
+data(ST_ncR_tar_cancer)
+gene_data <- ST_tar_cancer
+```
+
+The Zenodo-BRCA dataset is further divided into two datssets (expression data of TFs and mRNAs) according to the list of human TFs at https://humantfs.ccbr.utoronto.ca/download/v_1.01/TF_names_v_1.01.txt.
+
+```{r, eval=TRUE, include=TRUE}
+TF_complete_set <- read.delim("TF_names_v_1.01.txt", header = FALSE, stringsAsFactors=FALSE)[, 1]
+TF_data <- gene_data[rownames(gene_data) %in% TF_complete_set, , drop = FALSE]
+mRNA_data   <- gene_data[!(rownames(gene_data) %in% TF_complete_set), , drop = FALSE]
+```
+
+The Zenodo-BRCA dataset is further preprocessed by removing invariant genes, retaining only highly expressed and variable TFs and mRNAs.
+
+```{r, eval=TRUE, include=TRUE}
+## Remove genes with zero expression values in all cells
+TF_norm_mean <- unlist(lapply(seq(dim(TF_data)[1]), function(i) mean(TF_data[i, ])))
+TF_norm_zero <- TF_data[which(TF_norm_mean > 0), ]
+mRNA_norm_mean <- unlist(lapply(seq(dim(mRNA_data)[1]), function(i) mean(mRNA_data[i, ])))
+mRNA_norm_zero <- mRNA_data[which(mRNA_norm_mean > 0), ]
+
+## Reserve genes with higher mean expression values (top 10%) in all cells
+TF_mean <- rowMeans(TF_norm_zero)
+cutoff_TF <- quantile(TF_mean, probs = 0.9)
+TF_spatial <- TF_norm_zero[TF_mean >= cutoff_TF, ]
+mRNA_mean <- rowMeans(mRNA_norm_zero)
+cutoff_mRNA <- quantile(mRNA_mean, probs = 0.9)
+mR_spatial <- mRNA_norm_zero[mRNA_mean >= cutoff_mRNA, ]
+```
+
+# Sample-specific TF regulatory network construction
+We use default parameters of eight built-in methods (LIONESS, SCS, CSN, Scan.perturb, Scan.interp, SWEET, SINUM, and BONOBO) to infer tissue-specific TF regulatory networks. In this context, each tissue represents a sample.
+
+```{r, eval=TRUE, include=TRUE}
+install.packages("peakRAM")
+library(peakRAM)
+
+dir.create("Zenodo_BRCA_results", showWarnings = FALSE, recursive = TRUE)
+
+exprs <- list(
+  LIONESS = quote({
+    res_LIONESS <- LIONESS(TF_spatial, mR_spatial, num.cores = 16)
+    saveRDS(res_LIONESS, "Zenodo_BRCA_results/spatialRNA_LIONESS_res.rds")
+  }),
+  SCS = quote({
+    res_SCS <- SCS(rownames(TF_spatial), TF_spatial, mR_spatial, num.cores = 16)
+    saveRDS(res_SCS, "Zenodo_BRCA_results/spatialRNA_SCS_res.rds")
+  }),
+  CSN = quote({
+    res_CSN <- CSN(TF_spatial, mR_spatial, num.cores = 16)
+    saveRDS(res_CSN, "Zenodo_BRCA_results/spatialRNA_CSN_res.rds")
+  }),
+  Scan.perturb = quote({
+    res_Scan.perturb <- Scan.perturb(TF_spatial, mR_spatial, method = 'pearson', num.cores = 16)
+    saveRDS(res_Scan.perturb, "Zenodo_BRCA_results/spatialRNA_Scan.perturb_res.rds")
+  }),
+  Scan.interp = quote({
+    res_Scan.interp <- Scan.interp(TF_spatial, mR_spatial, method = 'pearson', num.cores = 16)
+    saveRDS(res_Scan.interp, "Zenodo_BRCA_results/spatialRNA_Scan.interp_res.rds")
+  }),
+  SWEET = quote({
+    res_SWEET <- SWEET(TF_spatial, mR_spatial, num.cores = 16)
+    saveRDS(res_SWEET, "Zenodo_BRCA_results/spatialRNA_SWEET_res.rds")
+  }),
+  SINUM = quote({
+    res_SINUM <- SINUM(TF_spatial, mR_spatial, num.cores = 16)
+    saveRDS(res_SINUM, "Zenodo_BRCA_results/spatialRNA_SINUM_res.rds")
+  }),
+  BONOBO = quote({
+    res_BONOBO <- BONOBO(TF_spatial, mR_spatial, num.cores = 16)
+    saveRDS(res_BONOBO, "Zenodo_BRCA_results/spatialRNA_BONOBO_res.rds")
+  })
+)
+
+peak_results <- do.call(peakRAM, exprs)
+saveRDS(peak_results, "Zenodo_BRCA_results/peakRAM_full_metrics_spatialRNA.rds")
+```
+
+# Sample-specific TF regulatory network validation
+To validate the predicted sample-specific TF regulatory networks, we use established ground truth from miRTarBase v10.0 and TarBase v9.0.
+
+```{r, eval=TRUE, include=TRUE}
+data(TFTarget_Groundtruth)
+spatialRNA_LIONESS_validation <- Network_validation(res_LIONESS, TFTarget_Groundtruth, calculate_metrics = TRUE)
+spatialRNA_CSN_validation <- Network_validation(res_CSN, TFTarget_Groundtruth, calculate_metrics = TRUE)
+spatialRNA_Scan.perturb_validation <- Network_validation(res_Scan.perturb, TFTarget_Groundtruth, calculate_metrics = TRUE)
+spatialRNA_Scan.interp_validation <- Network_validation(res_Scan.interp, TFTarget_Groundtruth, calculate_metrics = TRUE)
+spatialRNA_SWEET_validation <- Network_validation(res_SWEET, TFTarget_Groundtruth, calculate_metrics = TRUE)
+spatialRNA_SINUM_validation <- Network_validation(res_SINUM, TFTarget_Groundtruth, calculate_metrics = TRUE)
+spatialRNA_BONOBO_validation <- Network_validation(res_BONOBO, TFTarget_Groundtruth, calculate_metrics = TRUE)
+
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Extract performance values from each validation list
+df_list <- list(  
+  LIONESS      = spatialRNA_LIONESS_validation[[2]][,4]*100,
+  CSN          = spatialRNA_CSN_validation[[2]][,4]*100,
+  Scan.perturb = spatialRNA_Scan.perturb_validation[[2]][,4]*100,
+  Scan.interp  = spatialRNA_Scan.interp_validation[[2]][,4]*100,
+  SWEET        = spatialRNA_SWEET_validation[[2]][,4]*100,
+  SINUM        = spatialRNA_SINUM_validation[[2]][,4]*100,
+  BONOBO       = spatialRNA_BONOBO_validation[[2]][,4]*100
+)
+
+# Convert to long-format data frame (Method, Value)
+df_long <- bind_rows(lapply(names(df_list), function(method) {
+  data.frame(Method = method, Value = df_list[[method]])
+}))
+
+# Set Method as factor with the desired order
+df_long$Method <- factor(df_long$Method, levels = names(df_list))
+
+# Nature-inspired color palette 
+science_colors <- c("#0072B5", "#E18727", "#20854E", "#BC3C29", 
+                    "#7876B1", "#6A3D9A", "#FF7F00")
+
+# Generate boxplot with jittered points
+p <- ggplot(df_long, aes(x = Method, y = Value, fill = Method)) +
+  geom_boxplot(width = 0.6, alpha = 0.7, outlier.size = 0.5, 
+               color = "black", outlier.alpha = 0.3) +
+  geom_jitter(width = 0.15, size = 0.5, alpha = 0.3, color = "black") +
+  scale_fill_manual(values = science_colors[1:length(unique(df_long$Method))]) +
+  labs(x = "", y = "Percentage of validated TF targets (%)") +
+  theme_classic() +
+  theme(text = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+        axis.text.y = element_text(size = 8),
+        axis.line = element_line(linewidth = 0.5, color = "black"),
+        panel.grid = element_blank(),
+        legend.position = "none")
+
+# Display and save
+print(p)
+ggsave("performance_boxplot.png", p, width = 10, height = 9, dpi = 300, units = "cm")
+```
+
+# Sample similarity analysis
+We calculate pairwise sample similarity based on three key features derived from each sample-specific network: (i) network architecture, (ii) hub gene composition, and (iii) modular organization. Histograms with kernel density overlay were generated from the CID44971 breast cancer spot similarity matrices derived from sample-specific networks, hubs, and modules produced by the BONOBO method.
+
+```{r, eval=TRUE, include=TRUE}
+# network-level
+spatialRNA_LIONESS_net_sim <- Sim.network(res_LIONESS,  res_LIONESS)
+spatialRNA_CSN_net_sim <- Sim.network(res_CSN, res_CSN)
+spatialRNA_Scan.perturb_net_sim <- Sim.network(res_Scan.perturb, res_Scan.perturb)
+spatialRNA_Scan.interp_net_sim <- Sim.network(res_Scan.interp, res_Scan.interp)
+spatialRNA_SWEET_net_sim <- Sim.network(res_SWEET, res_SWEET)
+spatialRNA_SINUM_net_sim <- Sim.network(res_SINUM, res_SINUM)
+spatialRNA_BONOBO_net_sim <- Sim.network(res_BONOBO, res_BONOBO)
+
+# hub-level
+spatialRNA_LIONESS_hub <- Network_hub(res_LIONESS)
+spatialRNA_CSN_hub <- Network_hub(res_CSN)
+spatialRNA_Scan.perturb_hub <- Network_hub(res_Scan.perturb)
+spatialRNA_Scan.interp_hub <- Network_hub(res_Scan.interp)
+spatialRNA_SWEET_hub <- Network_hub(res_SWEET)
+spatialRNA_SINUM_hub <- Network_hub(res_SINUM)
+spatialRNA_BONOBO_hub <- Network_hub(res_BONOBO)
+
+spatialRNA_LIONESS_hub_sim <- Sim.hub(spatialRNA_LIONESS_hub,  spatialRNA_LIONESS_hub)
+spatialRNA_CSN_hub_sim <- Sim.hub(spatialRNA_CSN_hub, spatialRNA_CSN_hub)
+spatialRNA_Scan.perturb_hub_sim <- Sim.hub(spatialRNA_Scan.perturb_hub, spatialRNA_Scan.perturb_hub)
+spatialRNA_Scan.interp_hub_sim <- Sim.hub(spatialRNA_Scan.interp_hub, spatialRNA_Scan.interp_hub)
+spatialRNA_SWEET_hub_sim <- Sim.hub(spatialRNA_SWEET_hub, spatialRNA_SWEET_hub)
+spatialRNA_SINUM_hub_sim <- Sim.hub(spatialRNA_SINUM_hub, spatialRNA_SINUM_hub)
+spatialRNA_BONOBO_hub_sim <- Sim.hub(spatialRNA_BONOBO_hub,  spatialRNA_BONOBO_hub)
+
+# module-level
+spatialRNA_LIONESS_module <- Network_module(res_LIONESS)
+spatialRNA_CSN_module <- Network_module(res_CSN)
+spatialRNA_Scan.perturb_module <- Network_module(res_Scan.perturb)
+spatialRNA_Scan.interp_module <- Network_module(res_Scan.interp)
+spatialRNA_SWEET_module <- Network_module(res_SWEET)
+spatialRNA_SINUM_module <- Network_module(res_SINUM)
+spatialRNA_BONOBO_module <- Network_module(res_BONOBO)
+
+n_LIONESS <- length(spatialRNA_LIONESS_module)
+spatialRNA_LIONESS_module_sim <- matrix(NA, n_LIONESS, n_LIONESS)
+for (i in seq(n_LIONESS)) {
+  for (j in seq(n_LIONESS)) {
+    spatialRNA_LIONESS_module_sim[i, j] <- Sim.module(spatialRNA_LIONESS_module[[i]], spatialRNA_LIONESS_module[[j]])
+  }
+}
+
+rownames(spatialRNA_LIONESS_module_sim) <- rownames(spatialRNA_LIONESS_net_sim)  
+colnames(spatialRNA_LIONESS_module_sim) <- colnames(spatialRNA_LIONESS_net_sim) 
+
+n_CSN <- length(spatialRNA_CSN_module)
+spatialRNA_CSN_module_sim <- matrix(NA, n_CSN, n_CSN)
+for (i in seq(n_CSN)) {
+  for (j in seq(n_CSN)) {
+    spatialRNA_CSN_module_sim[i, j] <- Sim.module(spatialRNA_CSN_module[[i]], spatialRNA_CSN_module[[j]])
+  }
+}
+
+rownames(spatialRNA_CSN_module_sim) <- rownames(spatialRNA_CSN_net_sim)  
+colnames(spatialRNA_CSN_module_sim) <- colnames(spatialRNA_CSN_net_sim) 
+
+n_Scan.perturb <- length(spatialRNA_Scan.perturb_module)
+spatialRNA_Scan.perturb_module_sim <- matrix(NA, n_Scan.perturb, n_Scan.perturb)
+for (i in seq(n_Scan.perturb)) {
+  for (j in seq(n_Scan.perturb)) {
+    spatialRNA_Scan.perturb_module_sim[i, j] <- Sim.module(spatialRNA_Scan.perturb_module[[i]], spatialRNA_Scan.perturb_module[[j]])
+  }
+}
+
+rownames(spatialRNA_Scan.perturb_module_sim) <- rownames(spatialRNA_Scan.perturb_net_sim)  
+colnames(spatialRNA_Scan.perturb_module_sim) <- colnames(spatialRNA_Scan.perturb_net_sim) 
+
+n_Scan.interp <- length(spatialRNA_Scan.interp_module)
+spatialRNA_Scan.interp_module_sim <- matrix(NA, n_Scan.interp, n_Scan.interp)
+for (i in seq(n_Scan.interp)) {
+  for (j in seq(n_Scan.interp)) {
+    spatialRNA_Scan.interp_module_sim[i, j] <- Sim.module(spatialRNA_Scan.interp_module[[i]], spatialRNA_Scan.interp_module[[j]])
+  }
+}
+
+rownames(spatialRNA_Scan.interp_module_sim) <- rownames(spatialRNA_Scan.interp_net_sim)  
+colnames(spatialRNA_Scan.interp_module_sim) <- colnames(spatialRNA_Scan.interp_net_sim) 
+
+n_SWEET <- length(spatialRNA_SWEET_module)
+spatialRNA_SWEET_module_sim <- matrix(NA, n_SWEET, n_SWEET)
+for (i in seq(n_SWEET)) {
+  for (j in seq(n_SWEET)) {
+    spatialRNA_SWEET_module_sim[i, j] <- Sim.module(spatialRNA_SWEET_module[[i]], spatialRNA_SWEET_module[[j]])
+  }
+}
+
+rownames(spatialRNA_SWEET_module_sim) <- rownames(spatialRNA_SWEET_net_sim)  
+colnames(spatialRNA_SWEET_module_sim) <- colnames(spatialRNA_SWEET_net_sim) 
+
+n_SINUM <- length(spatialRNA_SINUM_module)
+spatialRNA_SINUM_module_sim <- matrix(NA, n_SINUM, n_SINUM)
+for (i in seq(n_SINUM)) {
+  for (j in seq(n_SINUM)) {
+    spatialRNA_SINUM_module_sim[i, j] <- Sim.module(spatialRNA_SINUM_module[[i]], spatialRNA_SINUM_module[[j]])
+  }
+}
+
+rownames(spatialRNA_SINUM_module_sim) <- rownames(spatialRNA_SINUM_net_sim)  
+colnames(spatialRNA_SINUM_module_sim) <- colnames(spatialRNA_SINUM_net_sim) 
+
+n_BONOBO <- length(spatialRNA_BONOBO_module)
+spatialRNA_BONOBO_module_sim <- matrix(NA, n_BONOBO, n_BONOBO)
+for (i in seq(n_BONOBO)) {
+  for (j in seq(n_BONOBO)) {
+    spatialRNA_BONOBO_module_sim[i, j] <- Sim.module(spatialRNA_BONOBO_module[[i]], spatialRNA_BONOBO_module[[j]])
+  }
+}
+
+rownames(spatialRNA_BONOBO_module_sim) <- rownames(spatialRNA_BONOBO_net_sim)  
+colnames(spatialRNA_BONOBO_module_sim) <- colnames(spatialRNA_BONOBO_net_sim) 
+
+## Distribution of network, hub, and module similarity
+install.packages("ggplot2")
+library(ggplot2)
+
+sim_list <- list(
+  net   = spatialRNA_BONOBO_net_sim,
+  hub   = spatialRNA_BONOBO_hub_sim,
+  module = spatialRNA_BONOBO_module_sim
+)
+
+for (name in names(sim_list)) {
+  vals <- sim_list[[name]][upper.tri(sim_list[[name]])]
+  
+  p <- ggplot(data.frame(similarity = vals), aes(x = similarity)) +
+    geom_histogram(aes(y = after_stat(density)), bins = 50,
+                   fill = "#0072B5", color = "white", alpha = 0.7) +
+    geom_density(color = "#BC3C29", linewidth = 0.3) +
+    labs(x = "Similarity", y = "Density") +
+    theme_classic() +
+    theme(text = element_text(size = 12), axis.title = element_text(size = 12),
+          axis.text = element_text(size = 8), axis.line = element_line(linewidth = 0.5),
+          panel.grid = element_blank())
+  
+  ggsave(paste0("similarity_distribution_", name, ".png"), p,
+         width = 8, height = 6, dpi = 300, units = "cm")
+}
+```
+
+# Clustering analysis
+Clustering analysis was performed on the 1057 CID44971 breast cancer spots using an overall similarity matrix derived from the BONOBO method, which was calculated as the geometric mean of the network, hub, and module similarity matrices.
+
+```{r, eval=TRUE, include=TRUE}
+install.packages(c("umap", "ggplot2", "dplyr", "cluster"))
+library(umap)
+library(ggplot2)
+library(dplyr)
+library(cluster)
+
+# Combined similarity matrix (geometric mean of three similarity matrices)
+overall_sim <- exp((log(spatialRNA_BONOBO_net_sim) + log(spatialRNA_BONOBO_hub_sim) + log(spatialRNA_BONOBO_module_sim))/3)
+
+# Convert similarity to distance matrix
+dist_mat <- as.matrix(1 - overall_sim)
+hc <- hclust(as.dist(dist_mat), method = "complete")
+
+# Find optimal k (2-10) with all clusters >= 2
+k_min <- 2
+k_max <- min(10, nrow(dist_mat) - 1)
+valid_ks <- c()
+sil_vals <- c()
+h_diffs <- c()
+
+for (k in k_min:k_max) {
+  cl <- cutree(hc, k = k)
+  if (min(table(cl)) >= 2) {
+    valid_ks <- c(valid_ks, k)
+    sil_vals <- c(sil_vals, mean(silhouette(cl, as.dist(dist_mat))[, 3]))
+    if (k < k_max) h_diffs <- c(h_diffs, diff(hc$height)[length(hc$height) - k])
+    else h_diffs <- c(h_diffs, NA)
+  }
+}
+
+if (length(valid_ks) == 0) {
+  best_k <- 2
+  warning("No k with all clusters >=2; forcing k=2")
+} else {
+  best_k_sil <- valid_ks[which.max(sil_vals)]
+  best_k_elbow <- valid_ks[which.max(h_diffs[!is.na(h_diffs)])]
+  best_k <- if (abs(best_k_sil - best_k_elbow) > 2) min(best_k_sil, best_k_elbow) else best_k_sil
+}
+
+# Cut tree at optimal k
+clusters <- cutree(hc, k = best_k)
+
+# Merge singletons (if any) to ensure all clusters >= 2
+tab <- table(clusters)
+if (min(tab) < 2) {
+  for (s in as.numeric(names(tab[tab == 1]))) {
+    idx <- which(clusters == s)
+    d <- dist_mat[idx, ]
+    d[idx] <- Inf
+    clusters[idx] <- clusters[which.min(d)]
+  }
+  clusters <- as.numeric(factor(clusters))
+}
+cat("Final cluster sizes:\n"); print(table(clusters))
+
+# UMAP dimensionality reduction
+set.seed(123)
+umap_out <- umap(d = dist_mat, input = "dist", n_neighbors = 30, min_dist = 0.3, n_components = 2)
+df <- data.frame(
+  UMAP1 = umap_out$layout[, 1],
+  UMAP2 = umap_out$layout[, 2],
+  Cluster = factor(clusters)
+)
+
+# Convex hulls and cluster centers
+hulls <- df %>% group_by(Cluster) %>% filter(n() >= 3) %>% slice(chull(UMAP1, UMAP2))
+centers <- df %>% group_by(Cluster) %>% summarise(UMAP1 = median(UMAP1), UMAP2 = median(UMAP2))
+
+# Colors (up to 10 clusters)
+cols <- c("#0072B5", "#E18727", "#20854E", "#BC3C29", "#7876B1",
+          "#6A3D9A", "#FF7F00", "#FDBF6F", "#B15928", "#A6CEE3")[1:length(unique(clusters))]
+
+p <- ggplot(df, aes(x = UMAP1, y = UMAP2, color = Cluster, fill = Cluster)) +
+  geom_point(size = 1.0, alpha = 0.6) +
+  geom_polygon(data = hulls, aes(fill = Cluster, color = Cluster),
+               alpha = 0.15, linewidth = 0.3, show.legend = FALSE) +
+  geom_text(data = centers, aes(label = Cluster), color = "black", size = 4, fontface = "bold") +
+  scale_color_manual(values = cols) + scale_fill_manual(values = cols) +
+  theme_classic() +
+  labs(x = "UMAP 1", y = "UMAP 2") +
+  theme(text = element_text(size = 10), axis.title = element_text(size = 10),
+        axis.text = element_text(size = 8), axis.line = element_line(linewidth = 0.5),
+        panel.grid = element_blank(), aspect.ratio = 1, legend.position = "right")
+
+ggsave("umap_clustering.png", p, width = 10, height = 8, dpi = 300, units = "cm")
+```
+
+# Conclusions
+In this tutorial, we apply S2N to show how to infer and validate sample-specific TF regulatory networks in the Zenodo-BRCA dataset. Moreover, we also perform sample similarity analysis based on three key features derived from each spot-specific network, including network architecture, hub gene composition, and modular organization. Taken together, S2N provides a useful platform for advancing personalized biomedical research, from uncovering driver alterations in individual patients to stratifying cohorts based on sample-specific networks.
+
+# Session information
+```{r}
+sessionInfo()
+```
